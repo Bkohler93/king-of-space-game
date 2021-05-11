@@ -30,8 +30,6 @@
                         <label for="green">Green</label>
                     </form>
                 </div>
-                
-
             </div>
             <div class="chat-box-wrapper">
                 <ul id="chats"></ul>
@@ -55,7 +53,7 @@
                     </ul>
                 </div>
             </div>
-                <canvas width="600" height="600"></canvas>
+                <canvas style="border: 1px solid black" id="game-canvas" width="1000" height="600"></canvas>
             
             
             <p id="controls">Controls: WASD, press 'C' to chat</p>
@@ -64,6 +62,6 @@
        <!-- socketio module intercepts request for socket.io.js clientside and
         return with clientside content of script -->
        <script src="/socket.io/socket.io.js"></script>
-        <script src="./src/client.js" async defer></script>
+        <script type="module" src="./src/client.js" async defer></script>
     </body>
 </html>

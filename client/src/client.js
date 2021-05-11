@@ -1,6 +1,9 @@
+import {animate} from './scene.js'
+
 //connect to server
 const sock = io();
 
+animate()
 
 //from server
 sock.on('message', logChat) //receive chat
@@ -11,17 +14,45 @@ sock.on('playerEntered', logNewPlayer)  //receive new player
 const submitNameButton = document.getElementById('submit-name')
 const submitChatButton = document.getElementById('send-chat')
 const chatWindow = document.getElementById('chat-box-wrapper')
+var canvas = document.getElementById('game-canvas')
 
 //Game variables
-const player = {}
+const player = {
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    dx: 0,
+    dy: 0, 
+}
 
 
 //listeners
 submitChatButton.addEventListener('click', submitChat)
 submitNameButton.addEventListener('click', sendPlayerDetails)
-EventTarget.addEventListener("keydown", event => {
-    console.log(event)
+
+document.addEventListener('keydown', event => {
+    const chatInput = document.getElementById('chat')
+
+    if (! (document.activeElement === chatInput)) {
+        switch(event.code) {
+            case 'KeyC':
+                openChat()
+                break
+            
+        }
+    }
 })
+
+function openChat() {
+
+    var chatBoxWrapper = document.querySelector('.chat-box-wrapper')
+    var chatInput = document.getElementById('chat')
+
+    if (! (document.activeElement === chatInput) ) {
+        if (!chatBoxWrapper.style.display) {
+            chatBoxWrapper.style.display = 'block'
+        } else chatBoxWrapper.style.display = ''
+    }
+}
 
 
 function sendPlayerDetails() {
@@ -37,7 +68,9 @@ function sendPlayerDetails() {
 
     //remove name input area
     var enterGamePrompt = document.getElementById('enter-game')
+    var screenWrapper = document.querySelector('.screen-wrapper')
     enterGamePrompt.style.display = 'none'
+    screenWrapper.style.backgroundColor = 'white'
 
     //submit player to server
     sock.emit('playerDetails', {name:name, color:color});
