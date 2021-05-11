@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>King of Space Game</title>
+        <meta name="description" content="multiplayer space game">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="./styles/styles.css">
+    </head>
+    <body>
+        <div class="screen-wrapper">
+            <h1 id="game-name">King of Space</h1>
+            
+            <p id="description">Destroy all other spaceships and rule the galaxy.</p>
+
+            <div id="enter-game">
+                <div id="enter-name">
+                    <input type="text" id="name" placeholder="Enter your name">
+                    <button type="button" id="submit-name">Submit</button>
+                </div>
+
+                <div id="select-color">
+                    <form id="colors">
+                        <input name="color" type="radio" value="red" id="red">
+                        <label for="red">Red</label>
+                        <input name="color" type="radio" value="blue" id="blue">
+                        <label for="blue">Blue</label>
+                        <input name="color" type="radio" value="blue" id="green">
+                        <label for="green">Green</label>
+                    </form>
+                </div>
+                
+
+            </div>
+            <div class="chat-box-wrapper">
+                <ul id="chats"></ul>
+                <div class="user-controls">
+                    <div class="controls-wrapper">
+                        <div id="send-chat-container">
+                            <div id="chat-form">
+                                <input id="chat" title="chat">
+                                <button id="send-chat">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div id="scores-container">
+                <h2 id="leaderboard">Leaderboard</h2>
+                <div id="high-scores">
+                    <ul id="score-list">
+                    </ul>
+                </div>
+            </div>
+                <canvas width="600" height="600"></canvas>
+            
+            
+            <p id="controls">Controls: WASD, press 'C' to chat</p>
+       </div>
+      
+       <!-- socketio module intercepts request for socket.io.js clientside and
+        return with clientside content of script -->
+       <script src="/socket.io/socket.io.js"></script>
+        <script src="./src/client.js" async defer></script>
+    </body>
+</html>
