@@ -1,27 +1,20 @@
 
 
 function animate() {
-   var canvas = document.getElementById('game-canvas')
-    var ctx = canvas.getContext("2d")
-
-    const FPS = 30 //fps
+    
+    const FPS = 60 //fps
+    const LASER_SPD = 450 //pixels per second
     const SHIP_SIZE = 30 //ship height in pixels
     const TURN_SPEED = 360 // degrees/second
     const SHIP_THRUST = 5 // acceleration, pixels/second
     const FRICTION = 0.7 // friction coefficient of space (0 = no fric, 1 = lots of frict)
+    var shootTimer = 0;
+    
+    var canvas = document.getElementById('game-canvas')
+    var ctx = canvas.getContext("2d")
 
-    var spaceship = {
-        x: 200,
-        y: 200,
-        r: SHIP_SIZE / 2,
-        a: 90 / 180 * Math.PI,   //convert to radians
-        rot: 0,
-        thrusting: false,   //currently thrusting/not
-        thrust: {       //magnitude of thrust
-            x: 0,
-            y: 0
-        }
-    }
+    var spaceship = newSpaceship()
+
 
     //set up event handlers
     document.addEventListener("keydown", (event) => keyDown(event));
@@ -42,6 +35,10 @@ function animate() {
             case 'KeyD':    // rotate right
                 spaceship.rot =  -TURN_SPEED / 180 * Math.PI / FPS
                 break
+            case 'Space':
+                console.log("shoot")
+                shootLaser()
+                break
         }
     }
     
@@ -56,6 +53,39 @@ function animate() {
             case 'KeyD':    //stop rotating right
                 spaceship.rot = 0 
                 break
+            case 'Space':   //allow shoooting again
+                break
+        }
+    }
+    
+    function newSpaceship() {
+        return {
+            x: Math.random() * (canvas.width - SHIP_SIZE),
+            y: Math.random() * (canvas.height - SHIP_SIZE),
+            r: SHIP_SIZE / 2,
+            a: 90 / 180 * Math.PI,   //convert to radians
+            rot: 0,
+            thrusting: false,   //currently thrusting/not
+            thrust: {       //magnitude of thrust
+                x: 0,
+                y: 0
+            },
+            laser: {},
+            shoot: false
+        }
+    }
+
+    function shootLaser () {
+        console.log(shootTimer)
+        if (shootTimer === 0) {
+            spaceship.laser = {
+                x: spaceship.x + 1 * spaceship.r * Math.cos(spaceship.a),
+                y: spaceship.y + 1 * spaceship.r * Math.sin(spaceship.a),
+                dx: LASER_SPD * Math.cos(spaceship.a) / FPS,
+                dy: -LASER_SPD * Math.sin(spaceship.a) / FPS,
+            }
+            console.log(spaceship.laser.x)
+            spaceship.shoot = true;
         }
     }
 
@@ -93,16 +123,36 @@ function animate() {
             spaceship.x - spaceship.r * (Math.cos(spaceship.a) - Math.sin(spaceship.a)),
             spaceship.y + spaceship.r * (Math.sin(spaceship.a) + Math.cos(spaceship.a))
         )
-
         ctx.stroke()
+
+
+        //check if fire bullet
+        if (shootTimer > 0 && shootTimer < (FPS * 2)) {
+            ctx.fillStyle = "salmon"
+            ctx.beginPath()
+            ctx.arc(spaceship.laser.x, spaceship.laser.y, SHIP_SIZE / 10, 0, Math.PI * 2, false)
+            ctx.fill()
+        }
 
         //rotate ship
         spaceship.a += spaceship.rot
 
-
         //move ship
         spaceship.x += spaceship.thrust.x
         spaceship.y -= spaceship.thrust.y
+
+        //laser travel
+        if (shootTimer <= (FPS * 2) && spaceship.shoot) {
+            spaceship.laser.x += spaceship.laser.dx
+            spaceship.laser.y += spaceship.laser.dy
+
+            shootTimer++
+            if (shootTimer === (FPS * 2)) {
+                shootTimer = 0
+                spaceship.shoot = false
+                delete spaceship.laser
+            }
+        }
     }
 }
 
