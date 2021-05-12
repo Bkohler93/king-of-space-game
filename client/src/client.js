@@ -1,14 +1,17 @@
-import {animate} from './scene.js'
+import {animate, drawScene} from './scene.js'
 
 //connect to server
 const sock = io();
 
-animate()
+
+//Game variables
+const player = {name: ""}
+
 
 //from server
 sock.on('message', logChat) //receive chat
 sock.on('playerEntered', logNewPlayer)  //receive new player
-
+sock.on('drawFullScene', drawScene) //draw scene with all players
 
 //DOM elements
 const submitNameButton = document.getElementById('submit-name')
@@ -16,16 +19,15 @@ const submitChatButton = document.getElementById('send-chat')
 const chatWindow = document.getElementById('chat-box-wrapper')
 var canvas = document.getElementById('game-canvas')
 
-//Game variables
-const player = {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    dx: 0,
-    dy: 0, 
-}
 
 
 //listeners
+window.addEventListener('keydown', event => {
+    if (event.code === 'Space')
+        event.preventDefault()
+})
+
+
 submitChatButton.addEventListener('click', submitChat)
 submitNameButton.addEventListener('click', sendPlayerDetails)
 
@@ -58,11 +60,12 @@ function openChat() {
 function sendPlayerDetails() {
 
     var name = getSubmitNameText();
-    var color = getPlayerColor();
+    
     if (!name) {
         alert('Please enter your name')
         return
     }
+    var color = getPlayerColor();
     player.name = name;
     player.color = color;
 
@@ -74,6 +77,7 @@ function sendPlayerDetails() {
 
     //submit player to server
     sock.emit('playerDetails', {name:name, color:color});
+    animate(name)
 }
 
 function getSubmitNameText() {
@@ -97,7 +101,6 @@ function submitChat() {
 
     var text = player.name +  ': ' + chatInput.value
     chatInput.value = ''
-    console.log(text)
     sock.emit('message', text)
 }
 
@@ -127,3 +130,4 @@ function logNewPlayer(player) {
     chatList.scrollTop = parent.scrollHeight
 }
 
+export {sock}

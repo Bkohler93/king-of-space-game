@@ -1,3 +1,12 @@
+html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar {
+    width: 0px;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -10,7 +19,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* background-color: grey; */
+    background-color: grey;
 }
 
 input {
@@ -47,7 +56,7 @@ canvas {
     height: 400px;
     width: 500px;
     display: flex;
-    display: none;
+    /* display: none; */
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
