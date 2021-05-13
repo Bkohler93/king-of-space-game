@@ -1,21 +1,73 @@
-import { sock } from "./client.js"
+import { sock, playerMe} from "./client.js"
+import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT} from './const.js'
 
-function drawScene(players) {
+// const FPS = 30 //fps
+// const LASER_SPD = 450 //pixels per second
+// const SHIP_SIZE = 30 //ship height in pixels
+// const TURN_SPEED = 360 // degrees/second
+// const SHIP_THRUST = 5 // acceleration, pixels/second
+// const FRICTION = 0.7 // friction coefficient of space (0 = no fric, 1 = lots of frict)
+// const CANVAS_HEIGHT = 600
+// const CANVAS_WIDHT = 1000
 
+
+
+function drawScene(players, lasers) {
     //clear canvas
     var canvas = document.getElementById('game-canvas')
     var ctx = canvas.getContext('2d')
   
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,canvas.width, canvas.height);
+
     //for each player draw ships
     players.forEach( (player) => {
-        let rad = 15 
+       
+        //draw and check for laser hits
+        lasers.forEach(laser => {
+            if (laser.x < 0) {
+                
+            }
+
+            else if (laser.name === player.name) {
+                ctx.fillStyle = "salmon"
+                ctx.beginPath()
+                ctx.arc(laser.x, laser.y, 5, 0, Math.PI * 2, false)
+                ctx.fill()
+            }
+
+            //check if laser hits inside hit boxes
+            // if (player.x === laser.x && player.y === laser.y)
+            //     console.log('hit')
+            else{
+                let w = Math.abs(player.x - laser.x)
+                let h = Math.abs(player.y - laser.y)
+                let d = Math.ceil(Math.sqrt(Math.pow(w,2) + Math.pow(h,2)))
+                if (d <= 15) {
+                    sock.emit('playerHit', player.name)
+                    return
+                }
+            }
+        })
+
+        
+        let rad = 15
+        if (player.name === playerMe.name) {
+            ctx.fillStyle = "white"
+            ctx.beginPath()
+            ctx.arc(
+                player.x,
+                player.y,
+                5, 0, Math.PI * 2, false
+            )
+            ctx.fill()
+        }
+
         //draw ship
         ctx.strokeStyle = "white"
-        ctx.fillStyle = "white"
+        ctx.fillStyle = "white" 
         ctx.lineWidth = 2
-        ctx.beginPath() 
+        ctx.beginPath()  
         ctx.moveTo( //nose of the ship
             player.x + rad * Math.cos(player.a),
             player.y - rad * Math.sin(player.a)
@@ -32,14 +84,7 @@ function drawScene(players) {
             player.x - rad * (Math.cos(player.a) - Math.sin(player.a)),
             player.y + rad * (Math.sin(player.a) + Math.cos(player.a))
         )
-        ctx.stroke()    
-
-        if (player.laserX) {
-            ctx.fillStyle = "salmon"
-            ctx.beginPath()
-            ctx.arc(player.laserX, player.laserY, 5, 0, Math.PI * 2, false)
-            ctx.fill()
-        }
+        ctx.stroke()   
     })
 
 }
@@ -48,14 +93,7 @@ function drawScene(players) {
 function animate(playerName) {
     
     
-    const FPS = 30 //fps
-    const LASER_SPD = 450 //pixels per second
-    const SHIP_SIZE = 30 //ship height in pixels
-    const TURN_SPEED = 360 // degrees/second
-    const SHIP_THRUST = 5 // acceleration, pixels/second
-    const FRICTION = 0.7 // friction coefficient of space (0 = no fric, 1 = lots of frict)
-    const CANVAS_HEIGHT = 600
-    const CANVAS_WIDHT = 1000
+    
     var shootTimer = 0;
     
     // var canvas = document.getElementById('game-canvas')
@@ -123,9 +161,10 @@ function animate(playerName) {
 
     function shootLaser () {
         if (shootTimer === 0) {
+            console.log('fire')
             spaceship.laser = {
-                x: spaceship.x + 1 * spaceship.r * Math.cos(spaceship.a),
-                y: spaceship.y + 1 * spaceship.r * Math.sin(spaceship.a),
+                x: spaceship.x + (spaceship.r + 1) * Math.cos(spaceship.a),
+                y: spaceship.y - (spaceship.r + 1) * Math.sin(spaceship.a),
                 dx: LASER_SPD * Math.cos(spaceship.a) / FPS,
                 dy: -LASER_SPD * Math.sin(spaceship.a) / FPS,
             }
@@ -203,7 +242,7 @@ function animate(playerName) {
             sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x,spaceship.y,
                 spaceship.a, spaceship.laser.x, spaceship.laser.y)
         } else {
-            sock.emit('submitPlayerData', playerName, spaceship.x, spaceship.y, spaceship.a)
+            sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x, spaceship.y, spaceship.a, -5, -5)
         }
         
     }

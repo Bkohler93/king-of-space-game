@@ -49,6 +49,12 @@ canvas {
   margin: 10px auto;
 }
 
+.chat-score-wrapper {
+    display: flex;
+    /* border: 5px solid black; */
+    justify-content: space-around;
+    width: 60%;
+}
 
 #enter-game {
     position: absolute;
@@ -80,10 +86,7 @@ canvas {
 .chat-box-wrapper {
     background-color: rgb(255, 255, 255);
     width: 400px;
-    margin: 20px auto;
     border: 1px solid lightgrey;
-    position: absolute;
-    display: none;
 }
 
 

@@ -16,32 +16,41 @@ const io = socketio(server) //wrap around server. filter out requests related
 
 //player array
 var players = []
+var lasers = []
+var numlasers = 0;
 const FPS = 30
 
+function laser(name, x, y) {
+    return {
+        name:name,
+        x:x,
+        y:y
+    }
+}
 
 //when new client is connected, this event listener runs and creates 'sock' object
 io.on('connection', (sock) => {
-    var userId = sock.id
-    console.log('Player connected')
+    const userId = sock.id
+    sock.emit('info', userId)
     sock.emit('message', 'You are connected')
 
     //sock.emit sends to ONE client, io.emit sends to ALL clients
     //sock.on receieves
     sock.on('message', (text) => io.emit('message', text))
-    sock.on('playerDetails', (player, userId) => processNewPlayer(player))
+    sock.on('playerDetails', (player) => processNewPlayer(player))
     sock.on('submitPlayerDataAndLaser', (playerName, x, y, a, laserX, laserY) =>
         addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY))
-    sock.on('submitPlayerData', (playerName, x,y,a) => 
-        addPlayerSceneNoLaser(playerName, x, y, a))
+    sock.on('playerHit', (playerName) => resetPlayerShip(playerName))
 
     setInterval(gameUpdate, 1000 / FPS)
 
     sock.on('disconnect', () => {
         let index = 0
         players.forEach((player) => {
-            if (player.userId = sock.id) {
+            if (player.id === sock.id) {
                 console.log (`Player ${player.name} has disconnected`)
                 players.splice(index, 1)
+                lasers.splice(index, 1)
             }
             index++
         })
@@ -49,7 +58,16 @@ io.on('connection', (sock) => {
 })
 
 function gameUpdate() {
-    io.emit('drawFullScene', players)
+    io.emit('drawFullScene', players, lasers)
+}
+
+function resetPlayerShip(playerName) {
+    players.forEach(player => {
+        if (player.name === playerName) {
+            player.x = Math.random() * 1000
+            player.y = Math.random() * 600
+        }
+    })
 }
 
 function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
@@ -58,27 +76,23 @@ function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
             player.x = x
             player.y = y
             player.a = a
-            player.laserX = laserX
-            player.laserY = laserY
             player.ready = true
+            lasers.forEach(laser => {
+                if (laser.name === player.name) {
+                    laser.x = laserX
+                    laser.y = laserY
+                }
+            })
         }
     })
 }
 
-function addPlayerSceneNoLaser(playerName, x, y, a) {
-    players.forEach(player => {
-        if (player.name === playerName) {
-            player.x = x
-            player.y = y
-            player.a = a
-        }
-    })
-}
 
 
-function processNewPlayer(player, userId) {
-    player.userId = userId
+function processNewPlayer(player) {
     players.push(player)
+    var newLaser = laser(player.name, -5, -5)
+    lasers.push(newLaser)
     console.log('received player details')
     io.emit('playerEntered', player)
 }
