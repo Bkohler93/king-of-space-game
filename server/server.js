@@ -58,14 +58,25 @@ io.on('connection', (sock) => {
 })
 
 function gameUpdate() {
+    players.forEach(player => {
+        if (player.hitCount > 0)
+            player.hitCount++
+            console.log(`hit count is ${player.hitCount}`)
+            if (player.hitCount > 200) {
+                player.hitCount = 0
+                player.hit = false;
+                console.log(`still counting`)
+            }
+    })
     io.emit('drawFullScene', players, lasers)
 }
 
 function resetPlayerShip(playerName) {
     players.forEach(player => {
-        if (player.name === playerName) {
-            player.x = Math.random() * 1000
-            player.y = Math.random() * 600
+        if (player.name === playerName  && player.hitCount === 0) {
+            player.hit = true
+            player.hitCount++;
+            io.to(player.id).emit('spaceshipHit')
         }
     })
 }
@@ -90,10 +101,10 @@ function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
 
 
 function processNewPlayer(player) {
+    player.hitCount = 0
     players.push(player)
     var newLaser = laser(player.name, -5, -5)
     lasers.push(newLaser)
-    console.log('received player details')
     io.emit('playerEntered', player)
 }
 

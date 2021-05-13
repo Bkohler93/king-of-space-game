@@ -1,5 +1,5 @@
 import { sock, playerMe} from "./client.js"
-import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT} from './const.js'
+import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS} from './const.js'
 
 // const FPS = 30 //fps
 // const LASER_SPD = 450 //pixels per second
@@ -10,19 +10,51 @@ import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEI
 // const CANVAS_HEIGHT = 600
 // const CANVAS_WIDHT = 1000
 
+var viewport = {
+    canvasX: CANVAS_WIDHT,
+    canvasY: CANVAS_HEIGHT,
+    minX: 0,
+    maxX: 0,
+    minY: 0,
+    maxY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    update: function(px, py) {  //dead center of screen
+
+    }
+}
+
+var starX = []
+var starY = []
+var starRad = []
+
+var canvas = document.getElementById('game-canvas')
+for (var i = 0; i < NUM_STARS; i++) {
+    starX.push(Math.random() * canvas.offsetWidth)
+    starY.push(Math.random() * canvas.offsetHeight) 
+    starRad.push(Math.random() * 1.2)
+}
 
 
 function drawScene(players, lasers) {
     //clear canvas
     var canvas = document.getElementById('game-canvas')
     var ctx = canvas.getContext('2d')
-  
+    
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,canvas.width, canvas.height);
+    
+
+    for (var i = 0; i < NUM_STARS; i++) {
+        ctx.beginPath();
+        ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
+        ctx.fillStyle = "hsla(200,100%,50%,0.8)";
+        ctx.fill();
+    }
 
     //for each player draw ships
     players.forEach( (player) => {
-       
+        
         //draw and check for laser hits
         lasers.forEach(laser => {
             if (laser.x < 0) {
@@ -39,20 +71,21 @@ function drawScene(players, lasers) {
             //check if laser hits inside hit boxes
             // if (player.x === laser.x && player.y === laser.y)
             //     console.log('hit')
-            else{
+            else if (!player.hit && player.hitCount === 0) {
                 let w = Math.abs(player.x - laser.x)
                 let h = Math.abs(player.y - laser.y)
                 let d = Math.ceil(Math.sqrt(Math.pow(w,2) + Math.pow(h,2)))
-                if (d <= 15) {
+                if (d <= SHIP_SIZE - 4.5) {
+                    console.log("hit")
+                    player.hit = true
                     sock.emit('playerHit', player.name)
-                    return
                 }
             }
         })
 
         
         let rad = 15
-        if (player.name === playerMe.name) {
+        if (player.name === playerMe.name && !player.hit) {
             ctx.fillStyle = "white"
             ctx.beginPath()
             ctx.arc(
@@ -61,30 +94,33 @@ function drawScene(players, lasers) {
                 5, 0, Math.PI * 2, false
             )
             ctx.fill()
+
         }
 
         //draw ship
-        ctx.strokeStyle = "white"
-        ctx.fillStyle = "white" 
-        ctx.lineWidth = 2
-        ctx.beginPath()  
-        ctx.moveTo( //nose of the ship
-            player.x + rad * Math.cos(player.a),
-            player.y - rad * Math.sin(player.a)
-        )
-        ctx.lineTo( //rear left
-            player.x - rad * (Math.cos(player.a) + Math.sin(player.a)),
-            player.y + rad * (Math.sin(player.a) - Math.cos(player.a))
-        )
-        ctx.moveTo( //nose of the ship
-            player.x + rad * Math.cos(player.a),
-            player.y - rad * Math.sin(player.a)
-        )
-        ctx.lineTo( //rear right
-            player.x - rad * (Math.cos(player.a) - Math.sin(player.a)),
-            player.y + rad * (Math.sin(player.a) + Math.cos(player.a))
-        )
-        ctx.stroke()   
+        if (!player.hit){
+            ctx.strokeStyle = "white"
+            ctx.fillStyle = "white" 
+            ctx.lineWidth = 2
+            ctx.beginPath()  
+            ctx.moveTo( //nose of the ship
+                player.x + rad * Math.cos(player.a),
+                player.y - rad * Math.sin(player.a)
+            )
+            ctx.lineTo( //rear left
+                player.x - rad * (Math.cos(player.a) + Math.sin(player.a)),
+                player.y + rad * (Math.sin(player.a) - Math.cos(player.a))
+            )
+            ctx.moveTo( //nose of the ship
+                player.x + rad * Math.cos(player.a),
+                player.y - rad * Math.sin(player.a)
+            )
+            ctx.lineTo( //rear right
+                player.x - rad * (Math.cos(player.a) - Math.sin(player.a)),
+                player.y + rad * (Math.sin(player.a) + Math.cos(player.a))
+            )
+            ctx.stroke()   
+        }
     })
 
 }
@@ -102,9 +138,17 @@ function animate(playerName) {
     var spaceship = newSpaceship()
 
 
+
     //set up event handlers
     document.addEventListener("keydown", (event) => keyDown(event));
     document.addEventListener("keyup", (event) => keyUp(event));
+
+    //listeners
+    sock.on('spaceshipHit', () => {
+        console.log('received')
+        spaceship.x =  Math.random() * (CANVAS_WIDHT - SHIP_SIZE)
+        spaceship.y = Math.random() * (CANVAS_HEIGHT - SHIP_SIZE)
+    })
 
     //game loop
     setInterval(update, 1000 / FPS)
@@ -177,6 +221,7 @@ function animate(playerName) {
         // ctx.fillStyle = "black"
         // ctx.fillRect(0,0,canvas.width, canvas.height);
 
+        
         // thrust the ship
         if (spaceship.thrusting) {
             spaceship.thrust.x += SHIP_THRUST * Math.cos(spaceship.a) / FPS

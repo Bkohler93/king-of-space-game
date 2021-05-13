@@ -69,15 +69,16 @@ function sendPlayerDetails() {
     var color = getPlayerColor();
     playerMe.name = name;
     playerMe.color = color;
-
+    playerMe.hit = false;
+    playerMe.hitCount= 0;
+    
     //remove name input area
     var enterGamePrompt = document.getElementById('enter-game')
     var screenWrapper = document.querySelector('.screen-wrapper')
     enterGamePrompt.style.display = 'none'
     screenWrapper.style.backgroundColor = 'white'
-    console.log(playerMe)
     //submit player to server
-    sock.emit('playerDetails', {name:name, color:color, id:playerMe.id});
+    sock.emit('playerDetails', playerMe);
     animate(name)
 }
 
@@ -131,6 +132,7 @@ function logNewPlayer(player) {
 
 function registerId(userId) {
     playerMe.id = userId
+    console.log(`user id is ${userId}`)
 }
 
 
