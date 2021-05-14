@@ -1,5 +1,5 @@
 import { sock, playerMe} from "./client.js"
-import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH} from './const.js'
+import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH, MAX_THRUST} from './const.js'
 
 // const FPS = 30 //fps
 // const LASER_SPD = 450 //pixels per second
@@ -10,30 +10,13 @@ import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEI
 // const CANVAS_HEIGHT = 600
 // const CANVAS_WIDHT = 1000
 
-// var viewport = {
-//     canvasX: CANVAS_WIDHT,
-//     canvasY: CANVAS_HEIGHT,
-//     minX: 0,
-//     maxX: 0,
-//     minY: 0,
-//     maxY: 0,
-//     offsetX: 0,
-//     offsetY: 0,
-//     update: function(px, py) {  //dead center of screen
-//         offsetX = Math.floor(canvasX/2 - px)
-//         offsetY = Math.floor(canvasY/2 - py)
-        
-//         var centerPos = [
-//             Math.floor(px/)
-//         ]
-//     }
-// }
 
 var starX = []
 var starY = []
 var starRad = []
 
 var canvas = document.getElementById('game-canvas')
+var ctx = canvas.getContext('2d')
 for (var i = 0; i < NUM_STARS; i++) {
     starX.push(Math.random() * MAP_WIDTH)
     starY.push(Math.random() * MAP_HEIGHT) 
@@ -43,12 +26,12 @@ for (var i = 0; i < NUM_STARS; i++) {
 
 function drawScene(players, lasers) {
     //clear canvas
-    var canvas = document.getElementById('game-canvas')
-    var ctx = canvas.getContext('2d')
     ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
     
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
+
+
     
     //origin x = -(playerMe.x - canvas_width/2)
     //origin y = -(playerMe.y - canvas_height/2)
@@ -176,8 +159,8 @@ function animate(playerName) {
     //listeners
     sock.on('spaceshipHit', () => {
         console.log('received')
-        spaceship.x =  Math.random() * (CANVAS_WIDHT - SHIP_SIZE)
-        spaceship.y = Math.random() * (CANVAS_HEIGHT - SHIP_SIZE)
+        spaceship.x = Math.floor(Math.random() * (CANVAS_WIDHT - SHIP_SIZE))
+        spaceship.y = Math.floor(Math.random() * (CANVAS_HEIGHT - SHIP_SIZE))
     })
 
     //game loop
@@ -218,8 +201,8 @@ function animate(playerName) {
     
     function newSpaceship() {
         return {
-            x: Math.random() * (CANVAS_WIDHT - SHIP_SIZE),
-            y: Math.random() * (CANVAS_HEIGHT - SHIP_SIZE),
+            x: Math.floor(Math.random() * (CANVAS_WIDHT - SHIP_SIZE)),
+            y: Math.floor(Math.random() * (CANVAS_HEIGHT - SHIP_SIZE)),
             r: SHIP_SIZE / 2,
             a: 90 / 180 * Math.PI,   //convert to radians
             rot: 0,
@@ -236,12 +219,17 @@ function animate(playerName) {
     function shootLaser () {
         if (shootTimer === 0) {
             console.log('fire')
+            console.log(`thrust xi s ${spaceship.thrust.x} and y is ${spaceship.thrust.y}`)
             spaceship.laser = {
+                
                 x: spaceship.x + (spaceship.r + 1) * Math.cos(spaceship.a),
                 y: spaceship.y - (spaceship.r + 1) * Math.sin(spaceship.a),
-                dx: LASER_SPD * Math.cos(spaceship.a) / FPS,
-                dy: -LASER_SPD * Math.sin(spaceship.a) / FPS,
+                // dx: ((spaceship.dx + LASER_SPD) * Math.cos(spaceship.a)) / FPS,
+                // dy: (-(spaceship.dy + LASER_SPD) * Math.sin(spaceship.a)) / FPS,
+                dx: (LASER_SPD + Math.abs(spaceship.thrust.x))  * Math.cos(spaceship.a),
+                dy: -1 * (LASER_SPD + Math.abs(spaceship.thrust.y)) * Math.sin(spaceship.a)
             }
+            console.log(`laser thrust x is ${spaceship.laser.dx} y is ${spaceship.laser.dy}`)
             spaceship.shoot = true;
         }
     }
@@ -257,8 +245,16 @@ function animate(playerName) {
             spaceship.thrust.x += SHIP_THRUST * Math.cos(spaceship.a) / FPS
             spaceship.thrust.y += SHIP_THRUST * Math.sin(spaceship.a) / FPS
         } else {
+
             spaceship.thrust.x -= FRICTION * spaceship.thrust.x / FPS
             spaceship.thrust.y -= FRICTION * spaceship.thrust.y / FPS
+        }
+
+        if (Math.abs(spaceship.thrust.x) > MAX_THRUST) {
+            spaceship.thrust.x = (spaceship.thrust.x < 0) ?  -MAX_THRUST : MAX_THRUST
+        }
+        if (Math.abs(spaceship.thrust.y) > MAX_THRUST) {
+            spaceship.thrust.y = (spaceship.thrust.y < 0) ? -MAX_THRUST : MAX_THRUST
         }
 
         //draw ship
@@ -297,12 +293,27 @@ function animate(playerName) {
         
         //move ship
         spaceship.x += spaceship.thrust.x
-        if (spaceship.x < (CANVAS_WIDHT/2)) spaceship.x = CANVAS_WIDHT/2
-        else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2)
+        if (spaceship.x < SHIP_SIZE) {
+            spaceship.x = SHIP_SIZE
+            spaceship.thrust.x = 0;
+        }
+        else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) {
+            spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2) -1
+            spaceship.thrust.x = 0;
+        }
+       
         
+
         spaceship.y -= spaceship.thrust.y
-        if (spaceship.y < (CANVAS_HEIGHT/2)) spaceship.y = CANVAS_HEIGHT/2
-        else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)) spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2)
+        if (spaceship.y < 0 + SHIP_SIZE) {
+            spaceship.y = SHIP_SIZE
+            spaceship.thrust.y = 0;
+        }
+
+        else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)){
+            spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2) - 1
+            spaceship.thrust.y = 0;
+        } 
 
         //laser travel
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {

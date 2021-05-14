@@ -49,6 +49,10 @@ canvas {
   margin: 10px auto;
 }
 
+#game-canvas {
+    background-color: transparent;
+}
+
 .chat-score-wrapper {
     display: flex;
     /* border: 5px solid black; */
