@@ -57,6 +57,7 @@ io.on('connection', (sock) => {
     })        
 })
 
+//send all scene data, check if player hitTimer is over (respawns if it is)
 function gameUpdate() {
     players.forEach(player => {
         if (player.hitCount > 0)
@@ -70,6 +71,8 @@ function gameUpdate() {
     io.emit('drawFullScene', players, lasers)
 }
 
+//executes upon receiving hit from a socket with playername that is hit. 
+// send result to hit player
 function resetPlayerShip(playerName) {
     
     players.forEach(player => {
@@ -81,6 +84,7 @@ function resetPlayerShip(playerName) {
     })
 }
 
+//populate each player object with lasers and new positions
 function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
     players.forEach(player => {
         if (player.name === playerName) {
@@ -99,7 +103,8 @@ function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
 }
 
 
-
+//store player and laser object into arrays
+//send notification in chat to all players
 function processNewPlayer(player) {
     player.hitCount = 0
     players.push(player)
