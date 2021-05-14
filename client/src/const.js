@@ -6,8 +6,8 @@ const SHIP_THRUST = 5 // acceleration, pixels/second
 const FRICTION = 0.7 // friction coefficient of space (0 = no fric, 1 = lots of frict)
 const CANVAS_HEIGHT = 600
 const CANVAS_WIDHT = 1000
-const MAP_HEIGHT = 10000
-const MAP_WIDTH = 10000
-const NUM_STARS = 5000
+const MAP_HEIGHT = 5000
+const MAP_WIDTH = 5000
+const NUM_STARS = 1000
 
 export {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH}

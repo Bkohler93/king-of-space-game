@@ -33,12 +33,12 @@ var starX = []
 var starY = []
 var starRad = []
 
-// var canvas = document.getElementById('game-canvas')
-// for (var i = 0; i < NUM_STARS; i++) {
-//     starX.push(Math.random() * 10000)
-//     starY.push(Math.random() * 10000) 
-//     starRad.push(Math.random() * 1.2)
-// }
+var canvas = document.getElementById('game-canvas')
+for (var i = 0; i < NUM_STARS; i++) {
+    starX.push(Math.random() * MAP_WIDTH)
+    starY.push(Math.random() * MAP_HEIGHT) 
+    starRad.push(Math.random() * 1.2)
+}
 
 
 function drawScene(players, lasers) {
@@ -61,12 +61,12 @@ function drawScene(players, lasers) {
     //     ctx.fillStyle = "hsla(200,100%,50%,0.8)";
     //     ctx.fill();
     
-    // for (var i = 0; i < NUM_STARS; i++) {
-    //     ctx.beginPath();
-    //     ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
-    //     ctx.fillStyle = "hsla(200,100%,50%,0.8)";
-    //     ctx.fill();
-    // }
+    for (var i = 0; i < NUM_STARS; i++) {
+        ctx.beginPath();
+        ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
+        ctx.fillStyle = "hsla(200,100%,50%,0.8)";
+        ctx.fill();
+    }
 
     //for each player draw ships
     players.forEach( (player) => {
@@ -128,6 +128,7 @@ function drawScene(players, lasers) {
 
         //draw ship
         if (!player.hit){
+
             ctx.strokeStyle = "white"
             ctx.fillStyle = "white" 
             ctx.lineWidth = 2
@@ -296,7 +297,12 @@ function animate(playerName) {
         
         //move ship
         spaceship.x += spaceship.thrust.x
+        if (spaceship.x < (CANVAS_WIDHT/2)) spaceship.x = CANVAS_WIDHT/2
+        else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2)
+        
         spaceship.y -= spaceship.thrust.y
+        if (spaceship.y < (CANVAS_HEIGHT/2)) spaceship.y = CANVAS_HEIGHT/2
+        else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)) spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2)
 
         //laser travel
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {
