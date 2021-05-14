@@ -1,5 +1,5 @@
 import { sock, playerMe} from "./client.js"
-import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS} from './const.js'
+import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH} from './const.js'
 
 // const FPS = 30 //fps
 // const LASER_SPD = 450 //pixels per second
@@ -10,51 +10,69 @@ import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEI
 // const CANVAS_HEIGHT = 600
 // const CANVAS_WIDHT = 1000
 
-var viewport = {
-    canvasX: CANVAS_WIDHT,
-    canvasY: CANVAS_HEIGHT,
-    minX: 0,
-    maxX: 0,
-    minY: 0,
-    maxY: 0,
-    offsetX: 0,
-    offsetY: 0,
-    update: function(px, py) {  //dead center of screen
-
-    }
-}
+// var viewport = {
+//     canvasX: CANVAS_WIDHT,
+//     canvasY: CANVAS_HEIGHT,
+//     minX: 0,
+//     maxX: 0,
+//     minY: 0,
+//     maxY: 0,
+//     offsetX: 0,
+//     offsetY: 0,
+//     update: function(px, py) {  //dead center of screen
+//         offsetX = Math.floor(canvasX/2 - px)
+//         offsetY = Math.floor(canvasY/2 - py)
+        
+//         var centerPos = [
+//             Math.floor(px/)
+//         ]
+//     }
+// }
 
 var starX = []
 var starY = []
 var starRad = []
 
-var canvas = document.getElementById('game-canvas')
-for (var i = 0; i < NUM_STARS; i++) {
-    starX.push(Math.random() * canvas.offsetWidth)
-    starY.push(Math.random() * canvas.offsetHeight) 
-    starRad.push(Math.random() * 1.2)
-}
+// var canvas = document.getElementById('game-canvas')
+// for (var i = 0; i < NUM_STARS; i++) {
+//     starX.push(Math.random() * 10000)
+//     starY.push(Math.random() * 10000) 
+//     starRad.push(Math.random() * 1.2)
+// }
 
 
 function drawScene(players, lasers) {
     //clear canvas
     var canvas = document.getElementById('game-canvas')
     var ctx = canvas.getContext('2d')
+    ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
     
     ctx.fillStyle = "black"
-    ctx.fillRect(0,0,canvas.width, canvas.height);
+    ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
     
+    //origin x = -(playerMe.x - canvas_width/2)
+    //origin y = -(playerMe.y - canvas_height/2)
 
-    for (var i = 0; i < NUM_STARS; i++) {
-        ctx.beginPath();
-        ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
-        ctx.fillStyle = "hsla(200,100%,50%,0.8)";
-        ctx.fill();
-    }
+    //
+
+    // for (var i = 0; i < NUM_STARS; i++) {    
+    //     ctx.beginPath();
+    //     ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.2, 0, 360);
+    //     ctx.fillStyle = "hsla(200,100%,50%,0.8)";
+    //     ctx.fill();
+    
+    // for (var i = 0; i < NUM_STARS; i++) {
+    //     ctx.beginPath();
+    //     ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
+    //     ctx.fillStyle = "hsla(200,100%,50%,0.8)";
+    //     ctx.fill();
+    // }
 
     //for each player draw ships
     players.forEach( (player) => {
         
+
+        // if (player.x )
         //draw and check for laser hits
         lasers.forEach(laser => {
             if (laser.x < 0) {
@@ -76,13 +94,24 @@ function drawScene(players, lasers) {
                 let h = Math.abs(player.y - laser.y)
                 let d = Math.ceil(Math.sqrt(Math.pow(w,2) + Math.pow(h,2)))
                 if (d <= SHIP_SIZE - 4.5) {
-                    console.log("hit")
                     player.hit = true
                     sock.emit('playerHit', player.name)
-                }
+                } 
             }
         })
 
+        //check for player collisions
+        if (playerMe.name !== player.name){
+            let w = Math.abs(player.x - playerMe.x)
+            let h = Math.abs(player.y - playerMe.y)
+            let d = Math.ceil(Math.sqrt(Math.pow(w,2)) + Math.pow(h,2))
+            if (d <= SHIP_SIZE + 20) {
+                playerMe.hit = true
+                player.hit = true
+                sock.emit('playerHit', player.name)
+                sock.emit('playerHit', playerMe.name)
+            }
+        }
         
         let rad = 15
         if (player.name === playerMe.name && !player.hit) {
@@ -281,7 +310,9 @@ function animate(playerName) {
                 spaceship.laser.y += spaceship.laser.dy
             }
         }
-        
+       
+        playerMe.x = spaceship.x
+        playerMe.y = spaceship.y
         //emit data
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {
             sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x,spaceship.y,

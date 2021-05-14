@@ -61,17 +61,17 @@ function gameUpdate() {
     players.forEach(player => {
         if (player.hitCount > 0)
             player.hitCount++
-            console.log(`hit count is ${player.hitCount}`)
             if (player.hitCount > 200) {
                 player.hitCount = 0
                 player.hit = false;
-                console.log(`still counting`)
+                console.log(`hit count limit reached`)
             }
     })
     io.emit('drawFullScene', players, lasers)
 }
 
 function resetPlayerShip(playerName) {
+    
     players.forEach(player => {
         if (player.name === playerName  && player.hitCount === 0) {
             player.hit = true
