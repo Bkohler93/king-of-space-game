@@ -26,24 +26,17 @@ for (var i = 0; i < NUM_STARS; i++) {
 
 function drawScene(players, lasers) {
     //clear canvas
-    ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
-    
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
+    ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
+    
 
 
     
     //origin x = -(playerMe.x - canvas_width/2)
     //origin y = -(playerMe.y - canvas_height/2)
 
-    //
-
-    // for (var i = 0; i < NUM_STARS; i++) {    
-    //     ctx.beginPath();
-    //     ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.2, 0, 360);
-    //     ctx.fillStyle = "hsla(200,100%,50%,0.8)";
-    //     ctx.fill();
-    
+        
     for (var i = 0; i < NUM_STARS; i++) {
         ctx.beginPath();
         ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
@@ -55,7 +48,6 @@ function drawScene(players, lasers) {
     players.forEach( (player) => {
         
 
-        // if (player.x )
         //draw and check for laser hits
         lasers.forEach(laser => {
             if (laser.x < 0) {
@@ -144,10 +136,6 @@ function animate(playerName) {
     
     
     var shootTimer = 0;
-    
-    // var canvas = document.getElementById('game-canvas')
-    // var ctx = canvas.getContext("2d")
-
     var spaceship = newSpaceship()
 
 
@@ -235,10 +223,6 @@ function animate(playerName) {
     }
 
     function update() {
-        //draw spaceship
-        // ctx.fillStyle = "black"
-        // ctx.fillRect(0,0,canvas.width, canvas.height);
-
         
         // thrust the ship
         if (spaceship.thrusting) {
@@ -256,37 +240,6 @@ function animate(playerName) {
         if (Math.abs(spaceship.thrust.y) > MAX_THRUST) {
             spaceship.thrust.y = (spaceship.thrust.y < 0) ? -MAX_THRUST : MAX_THRUST
         }
-
-        //draw ship
-        // ctx.strokeStyle = "white"
-        // ctx.lineWidth = SHIP_SIZE / 20
-        // ctx.beginPath() 
-        // ctx.moveTo( //nose of the ship
-        //     spaceship.x + spaceship.r * Math.cos(spaceship.a),
-        //     spaceship.y - spaceship.r * Math.sin(spaceship.a)
-        // )
-        // ctx.lineTo( //rear left
-        //     spaceship.x - spaceship.r * (Math.cos(spaceship.a) + Math.sin(spaceship.a)),
-        //     spaceship.y + spaceship.r * (Math.sin(spaceship.a) - Math.cos(spaceship.a))
-        // )
-        // ctx.moveTo( //nose of the ship
-        //     spaceship.x + spaceship.r * Math.cos(spaceship.a),
-        //     spaceship.y - spaceship.r * Math.sin(spaceship.a)
-        // )
-        // ctx.lineTo( //rear right
-        //     spaceship.x - spaceship.r * (Math.cos(spaceship.a) - Math.sin(spaceship.a)),
-        //     spaceship.y + spaceship.r * (Math.sin(spaceship.a) + Math.cos(spaceship.a))
-        // )
-        // ctx.stroke()
-
-
-        //check if fire bullet
-        // if (shootTimer > 0 && shootTimer < (FPS * 2)) {
-        //     ctx.fillStyle = "salmon"
-        //     ctx.beginPath()
-        //     ctx.arc(spaceship.laser.x, spaceship.laser.y, SHIP_SIZE / 10, 0, Math.PI * 2, false)
-        //     ctx.fill()
-        // }
 
         //rotate ship
         spaceship.a += spaceship.rot
@@ -330,6 +283,7 @@ function animate(playerName) {
        
         playerMe.x = spaceship.x
         playerMe.y = spaceship.y
+
         //emit data
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {
             sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x,spaceship.y,

@@ -20,6 +20,6 @@
   },
   "engines": {
     "node": "14.16.0"
-  }
-
+  },
+  "heroku-run-build-script": true
 }
