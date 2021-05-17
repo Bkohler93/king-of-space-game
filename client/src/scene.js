@@ -1,5 +1,5 @@
 import { sock, playerMe} from "./client.js"
-import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH, MAX_THRUST} from './const.js'
+import {FPS, LASER_SPD, SHIP_SIZE, TURN_SPEED, SHIP_THRUST, FRICTION, CANVAS_HEIGHT, CANVAS_WIDHT, NUM_STARS, MAP_HEIGHT, MAP_WIDTH, MAX_THRUST, MINI_MAP_SIZE, MINI_MAP_X_OFF, MINI_MAP_Y_OFF} from './const.js'
 
 // const FPS = 30 //fps
 // const LASER_SPD = 450 //pixels per second
@@ -20,7 +20,7 @@ var ctx = canvas.getContext('2d')
 for (var i = 0; i < NUM_STARS; i++) {
     starX.push(Math.random() * MAP_WIDTH)
     starY.push(Math.random() * MAP_HEIGHT) 
-    starRad.push(Math.random() * 1.2)
+    starRad.push(Math.random() * 1.3)
 }
 
 
@@ -30,9 +30,11 @@ function drawScene(players, lasers) {
     ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
     ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
     
+    //draw minimap
+    ctx.strokeStyle = "white"
+    ctx.strokeRect(playerMe.x + MINI_MAP_X_OFF, playerMe.y + MINI_MAP_Y_OFF, 138, 144) // last two numbers dictate end of map x/y direction
 
 
-    
     //origin x = -(playerMe.x - canvas_width/2)
     //origin y = -(playerMe.y - canvas_height/2)
 
@@ -50,7 +52,7 @@ function drawScene(players, lasers) {
 
         //draw and check for laser hits
         lasers.forEach(laser => {
-            if (laser.x < 0) {
+            if (laser.x < 0 || laser.y < 0) {
                 
             }
 
@@ -101,9 +103,30 @@ function drawScene(players, lasers) {
 
         }
 
+        //draw mini map dot
+        if (playerMe.name === player.name) {
+
+            ctx.strokeStyle = "white"
+            ctx.strokeRect(
+                playerMe.x + MINI_MAP_X_OFF +( player.x * MINI_MAP_SIZE /  MAP_WIDTH) - 10,
+                playerMe.y + MINI_MAP_Y_OFF + ( player.y * MINI_MAP_SIZE /  MAP_WIDTH) - 6,
+                20, 12
+            )
+        } else {
+            ctx.fillStyle = "white"
+            ctx.beginPath()
+            ctx.arc(
+                playerMe.x + MINI_MAP_X_OFF +( player.x * MINI_MAP_SIZE /  MAP_WIDTH),
+                playerMe.y + MINI_MAP_Y_OFF + ( player.y * MINI_MAP_SIZE /  MAP_WIDTH),
+                3, 0, Math.PI * 2, false
+            )
+            ctx.fill()
+        }
+
+
         //draw ship
         if (!player.hit){
-
+            ctx.fillText(player.name, player.x + 20, player.y + 20)
             ctx.strokeStyle = "white"
             ctx.fillStyle = "white" 
             ctx.lineWidth = 2
@@ -147,8 +170,8 @@ function animate(playerName) {
     //listeners
     sock.on('spaceshipHit', () => {
         console.log('received')
-        spaceship.x = Math.floor(Math.random() * (CANVAS_WIDHT - SHIP_SIZE))
-        spaceship.y = Math.floor(Math.random() * (CANVAS_HEIGHT - SHIP_SIZE))
+        spaceship.x = Math.floor(Math.random() * (MAP_WIDTH - SHIP_SIZE))
+        spaceship.y = Math.floor(Math.random() * (MAP_HEIGHT - SHIP_SIZE))
     })
 
     //game loop
@@ -189,8 +212,8 @@ function animate(playerName) {
     
     function newSpaceship() {
         return {
-            x: Math.floor(Math.random() * (CANVAS_WIDHT - SHIP_SIZE)),
-            y: Math.floor(Math.random() * (CANVAS_HEIGHT - SHIP_SIZE)),
+            x: Math.floor(Math.random() * (MAP_WIDTH - SHIP_SIZE)),
+            y: Math.floor(Math.random() * (MAP_HEIGHT - SHIP_SIZE)),
             r: SHIP_SIZE / 2,
             a: 90 / 180 * Math.PI,   //convert to radians
             rot: 0,
@@ -251,7 +274,7 @@ function animate(playerName) {
             spaceship.thrust.x = 0;
         }
         else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) {
-            spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2) -1
+            spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2)
             spaceship.thrust.x = 0;
         }
        
