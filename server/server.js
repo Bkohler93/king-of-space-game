@@ -119,6 +119,6 @@ server.on('error', (err) => {
 })
 
 //server needs to listen on port 
-server.listen(process.env.PORT || 8022, () =>{
-    console.log("Server is listening on port 8022...")
+server.listen(process.env.PORT || 8021, () =>{
+    console.log("Server is listening on port 8021...")
 })

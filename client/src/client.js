@@ -17,7 +17,6 @@ sock.on('info', registerId)
 //DOM elements
 const submitNameButton = document.getElementById('submit-name')
 const submitChatButton = document.getElementById('send-chat')
-const chatWindow = document.getElementById('chat-box-wrapper')
 var canvas = document.getElementById('game-canvas')
 
 
@@ -46,17 +45,17 @@ document.addEventListener('keydown', event => {
 
 
 /////FUNCTIONS
-function openChat() {
+// function openChat() {
 
-    var chatBoxWrapper = document.querySelector('.chat-box-wrapper')
-    var chatInput = document.getElementById('chat')
+//     var chatBoxWrapper = document.querySelector('.chat-box-wrapper')
+//     var chatInput = document.getElementById('chat')
 
-    if (! (document.activeElement === chatInput) ) {
-        if (!chatBoxWrapper.style.display) {
-            chatBoxWrapper.style.display = 'block'
-        } else chatBoxWrapper.style.display = ''
-    }
-}
+//     if (! (document.activeElement === chatInput) ) {
+//         if (!chatBoxWrapper.style.display) {
+//             chatBoxWrapper.style.display = 'block'
+//         } else chatBoxWrapper.style.display = ''
+//     }
+// }
 
 function sendPlayerDetails() {
 
