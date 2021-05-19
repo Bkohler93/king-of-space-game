@@ -1,12 +1,11 @@
 const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
-const { isBoolean } = require('util')
 
 //create app
 const app = express()
 
-//server from client folder
+//serve from client folder
 app.use(express.static(`${__dirname}/../client`))
 
 //add event listener for app
@@ -17,7 +16,8 @@ const io = socketio(server) //wrap around server. filter out requests related
 //player array
 var players = []
 var lasers = []
-var numlasers = 0;
+var numlasers = 0
+var leader
 const FPS = 30
 
 function laser(name, x, y) {
@@ -41,6 +41,7 @@ io.on('connection', (sock) => {
     sock.on('submitPlayerDataAndLaser', (playerName, x, y, a, laserX, laserY) =>
         addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY))
     sock.on('playerHit', (playerName) => resetPlayerShip(playerName))
+    sock.on('shipDestroyed', (playerName) => addDestroyCount(playerName))
 
     setInterval(gameUpdate, 1000 / FPS)
 
@@ -59,16 +60,33 @@ io.on('connection', (sock) => {
 
 //send all scene data, check if player hitTimer is over (respawns if it is)
 function gameUpdate() {
+    var maxHits = 0;
     players.forEach(player => {
-        if (player.hitCount > 0)
+        if (player.hitCount > 0) {
             player.hitCount++
             if (player.hitCount > 200) {
                 player.hitCount = 0
                 player.hit = false;
-                console.log(`hit count limit reached`)
             }
+        }
+
+        if (player.destroyCount > 0) {
+            player.destroyCount++
+            if (player.destroyCount > 200) {
+                player.destroyCount = 0
+            }
+        }
+        if (player.shipsDestroyed > maxHits) {
+            maxHits = player.shipsDestroyed;
+            leader = player
+        }
     })
-    io.emit('drawFullScene', players, lasers)
+    
+    if (leader && leader.shipsDestroyed === 0) {
+        leader =  null
+    }
+
+    io.emit('drawFullScene', players, lasers, leader)
 }
 
 //executes upon receiving hit from a socket with playername that is hit. 
@@ -78,12 +96,23 @@ function resetPlayerShip(playerName) {
     players.forEach(player => {
         if (player.name === playerName  && player.hitCount === 0) {
             player.hit = true
+            player.shipsDestroyed = 0 //reset killstreak
             player.hitCount++;
             io.to(player.id).emit('spaceshipHit')
         }
     })
 }
 
+//executes when player lands a shot on another player
+function addDestroyCount(playerName) {
+
+    players.forEach(player => {
+        if (player.name === playerName && player.destroyCount === 0) {
+            player.shipsDestroyed++
+            player.destroyCount++
+        }
+    })
+}
 //populate each player object with lasers and new positions
 function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
     players.forEach(player => {
@@ -107,6 +136,8 @@ function addPlayerSceneWithLaser(playerName, x, y, a, laserX, laserY) {
 //send notification in chat to all players
 function processNewPlayer(player) {
     player.hitCount = 0
+    player.shipsDestroyed = 0
+    player.destroyCount = 0
     players.push(player)
     var newLaser = laser(player.name, -5, -5)
     lasers.push(newLaser)
