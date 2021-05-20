@@ -55,11 +55,11 @@ function drawScene(players) {
     //clear canvas
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
-    ctx.setTransform(1,0,0,1, -(playerMe.x - CANVAS_WIDHT/2),-(playerMe.y - CANVAS_HEIGHT/2)) 
+    ctx.setTransform(1,0,0,1, -(players[playerMe.id].x - CANVAS_WIDHT/2),-(players[playerMe.id].y - CANVAS_HEIGHT/2)) 
     
     //draw minimap
     ctx.strokeStyle = "white"
-    ctx.strokeRect(playerMe.x + MINI_MAP_X_OFF, playerMe.y + MINI_MAP_Y_OFF, 138, 144) // last two numbers dictate end of map x/y direction
+    ctx.strokeRect(players[playerMe.id].x + MINI_MAP_X_OFF, players[playerMe.id].y + MINI_MAP_Y_OFF, 145, 144) // last two numbers dictate end of map x/y direction
 
    
     //calculate leader
@@ -75,8 +75,8 @@ function drawScene(players) {
 
     //draw other players dots on minimap
     Object.keys(players).forEach(id => {
-        let miniMapOffX = playerMe.x + MINI_MAP_X_OFF
-        let miniMapOffY = playerMe.y + MINI_MAP_Y_OFF
+        let miniMapOffX = players[playerMe.id].x + MINI_MAP_X_OFF
+        let miniMapOffY = players[playerMe.id].y + MINI_MAP_Y_OFF
         let miniMapScale = MINI_MAP_SIZE / MAP_WIDTH
 
 
@@ -85,8 +85,8 @@ function drawScene(players) {
             ctx.strokeStyle = 'white'
             ctx.strokeRect(
 
-                miniMapOffX + (playerMe.x * miniMapScale) - 10,
-                miniMapOffY + (playerMe.y * miniMapScale) - 6,
+                miniMapOffX + (players[playerMe.id].x * miniMapScale) - 10,
+                miniMapOffY + (players[playerMe.id].y * miniMapScale) - 6,
                 20, 12
             )
         } else if (leader && leader === id) {
@@ -118,11 +118,11 @@ function drawScene(players) {
     })
    
     //write current player's score
-    ctx.fillText(`Your current score: ${players[playerMe.id].shipsDestroyed}`, playerMe.x + SCORE_OFF_X, playerMe.y - SCORE_OFF_Y)
+    ctx.fillText(`Your current score: ${players[playerMe.id].shipsDestroyed}`, players[playerMe.id].x + SCORE_OFF_X, players[playerMe.id].y - SCORE_OFF_Y)
     
     //write current leader's score
     if (leader) {
-        ctx.fillText(`Leader is ${players[leader].name} with ${players[leader].shipsDestroyed}`, playerMe.x - LEADER_OFF_X, playerMe.y - LEADER_OFF_Y)
+        ctx.fillText(`Leader is ${players[leader].name} with ${players[leader].shipsDestroyed}`, players[playerMe.id].x - LEADER_OFF_X, players[playerMe.id].y - LEADER_OFF_Y)
     }
 
     
@@ -135,12 +135,14 @@ function drawScene(players) {
 
     //draw ships and lasers
     Object.keys(players).forEach(id => {
+
+        //draw lasers
+        ctx.fillStyle = 'salmon'
+        ctx.beginPath()
+        ctx.arc(players[id].laserX, players[id].laserY, 5, 0, Math.PI * 2, false)
+        ctx.fill()
+
         if (!players[id].hit) {
-            //draw lasers
-            ctx.fillStyle = 'salmon'
-            ctx.beginPath()
-            ctx.arc(players[id].laserX, players[id].laserY, 5, 0, Math.PI * 2, false)
-            ctx.fill()
 
             //draw ships
             let rad = 15
@@ -280,8 +282,8 @@ function animate(playerId) {
         //move ship
         spaceship.x += spaceship.thrust.x
         spaceship.x = Math.floor(spaceship.x)
-        if (spaceship.x < SHIP_SIZE) {
-            spaceship.x = SHIP_SIZE
+        if (spaceship.x < CANVAS_WIDHT / 2) {
+            spaceship.x = CANVAS_WIDHT / 2
             spaceship.thrust.x = 0;
         } else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) {
             spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2)
@@ -290,11 +292,11 @@ function animate(playerId) {
 
         spaceship.y -= spaceship.thrust.y
         spaceship.y = Math.floor(spaceship.y)
-        if (spaceship.y < 0 + SHIP_SIZE) {
-            spaceship.y = SHIP_SIZE
+        if (spaceship.y < CANVAS_HEIGHT / 2) {
+            spaceship.y = CANVAS_HEIGHT / 2
             spaceship.thrust.y = 0;
         } else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)){
-            spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2) - 1
+            spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2)
             spaceship.thrust.y = 0;
         } 
 
