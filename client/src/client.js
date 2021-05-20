@@ -3,10 +3,8 @@ import {animate, drawScene} from './scene.js'
 //connect to server
 const sock = io();
 
-
 //Game variables
 const playerMe = {name: ""}
-
 
 //from server
 sock.on('message', logChat) //receive chat
@@ -19,43 +17,15 @@ const submitNameButton = document.getElementById('submit-name')
 const submitChatButton = document.getElementById('send-chat')
 var canvas = document.getElementById('game-canvas')
 
-
-
 //listeners
 window.addEventListener('keydown', event => {
     if (event.code === 'Space')
         event.preventDefault()
 })
 
-
 submitChatButton.addEventListener('click', submitChat)
 submitNameButton.addEventListener('click', sendPlayerDetails)
-document.addEventListener('keydown', event => {
-    const chatInput = document.getElementById('chat')
 
-    if (! (document.activeElement === chatInput)) {
-        switch(event.code) {
-            case 'KeyC':
-                openChat()
-                break
-            
-        }
-    }
-})
-
-
-/////FUNCTIONS
-// function openChat() {
-
-//     var chatBoxWrapper = document.querySelector('.chat-box-wrapper')
-//     var chatInput = document.getElementById('chat')
-
-//     if (! (document.activeElement === chatInput) ) {
-//         if (!chatBoxWrapper.style.display) {
-//             chatBoxWrapper.style.display = 'block'
-//         } else chatBoxWrapper.style.display = ''
-//     }
-// }
 
 function sendPlayerDetails() {
 
@@ -65,35 +35,22 @@ function sendPlayerDetails() {
         alert('Please enter your name')
         return
     }
-    var color = getPlayerColor();
     playerMe.name = name;
-    playerMe.color = color;
     playerMe.hit = false;
-    playerMe.hitCount= 0;
     
     //remove name input area
     var enterGamePrompt = document.getElementById('enter-game')
     var screenWrapper = document.querySelector('.screen-wrapper')
     enterGamePrompt.style.display = 'none'
     screenWrapper.style.backgroundColor = 'white'
+
     //submit player to server
     sock.emit('playerDetails', playerMe);
-    animate(name)
+    animate(playerMe.id)
 }
 
 function getSubmitNameText() {
     return document.getElementById('name').value;
-}
-
-function getPlayerColor() {
-    
-    var color = document.getElementsByName('color')
-
-    for (let i = 0; i < color.length; i++) {
-        if (color[i].checked) {
-            return color[i].value
-        }
-    }
 }
 
 function submitChat() {

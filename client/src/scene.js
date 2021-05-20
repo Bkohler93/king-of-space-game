@@ -6,7 +6,7 @@ var starY = []
 var starRad = []
 
 var canvas = document.getElementById('game-canvas')
-var ctx = canvas.getContext('2d')
+var ctx = canvas.getContext('2d', { alpha: false})
 for (var i = 0; i < NUM_STARS; i++) {
     starX.push(Math.random() * MAP_WIDTH)
     starY.push(Math.random() * MAP_HEIGHT) 
@@ -14,7 +14,44 @@ for (var i = 0; i < NUM_STARS; i++) {
 }
 
 
-function drawScene(players, lasers, leader) {
+function drawScene(players) {
+
+    //decrease playerMe destroyCounter if previously shot down ship
+    if (playerMe.destroyedShip) {
+        playerMe.destroyedShip = ((playerMe.destroyCounter--) < 0) ? false : true
+    }
+
+    //check for laser hits
+    if (!playerMe.destroyedShip) {
+        Object.keys(players).forEach(id => {
+            let w = Math.abs(players[id].x - players[playerMe.id].laserX)
+            let h = Math.abs(players[id].y - players[playerMe.id].laserY)
+            let d = Math.ceil(Math.sqrt(Math.pow(w,2) + Math.pow(h,2)))
+            if (d <= SHIP_SIZE - 4.5) {
+                players[id].hit = true
+                playerMe.destroyedShip = true
+                playerMe.destroyCounter = 6
+                sock.emit('shipDestroyed', playerMe.id)
+                sock.emit('playerHit', id)
+            }
+        })
+    }
+
+    //check for collisions
+    Object.keys(players).forEach(id => {
+        if (id !== playerMe.id) {
+            let w = Math.abs(players[id].x - playerMe.x)
+            let h = Math.abs(players[id].y - playerMe.y)
+            let d = Math.ceil(Math.sqrt(Math.pow(w,2)) + Math.pow(h,2))
+            if (d <= SHIP_SIZE + 20) {
+                players[playerMe.id].hit = true
+                players[id].hit = true
+                sock.emit('playerHit', id)
+                sock.emit('playerHit', playerMe.id)
+            }
+        }
+    })
+
     //clear canvas
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,MAP_WIDTH, MAP_HEIGHT);
@@ -24,108 +61,40 @@ function drawScene(players, lasers, leader) {
     ctx.strokeStyle = "white"
     ctx.strokeRect(playerMe.x + MINI_MAP_X_OFF, playerMe.y + MINI_MAP_Y_OFF, 138, 144) // last two numbers dictate end of map x/y direction
 
+   
+    //calculate leader
+    var maxShipsDestroyed = 0
+    var leader
+    Object.keys(players).forEach(id => {
 
-    //origin x = -(playerMe.x - canvas_width/2)
-    //origin y = -(playerMe.y - canvas_height/2)
-
-        
-    for (var i = 0; i < NUM_STARS; i++) {
-        ctx.beginPath();
-        ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
-        ctx.fillStyle = "hsla(200,100%,50%,0.8)";
-        ctx.fill();
-    }
-
-    //hit register
-    
-
-    //for each player draw ships
-    players.forEach( (player) => {
-        
-        //draw and check for laser hits
-        for (let i = 0; i < lasers.length; i++) {
-            // lasers.forEach(laser => {
-                if (lasers[i].x < 0 || lasers[i].y < 0) {
-                    //do nothing if laser is out of bounds
-                }
-
-                //draw laser when laser's name is player's name
-                else if (lasers[i].name === player.name) {
-                    ctx.fillStyle = "salmon"
-                    ctx.beginPath()
-                    ctx.arc(lasers[i].x, lasers[i].y, 5, 0, Math.PI * 2, false)
-                    ctx.fill()
-                }
-
-                //check if laser hits spaceship
-                //if distance between center of ship and laser is less than
-                // ship radius than register hit 
-                else if (!player.hit && player.hitCount === 0) {
-                    let w = Math.abs(player.x - lasers[i].x)
-                    let h = Math.abs(player.y - lasers[i].y)
-                    let d = Math.ceil(Math.sqrt(Math.pow(w,2) + Math.pow(h,2)))
-                    if (d <= SHIP_SIZE - 4.5) {
-                        player.hit = true
-                        sock.emit('shipDestroyed', lasers[i].name)
-                        sock.emit('playerHit', player.name)
-                    } 
-                    break
-                }
-            // })
+        if(players[id].shipsDestroyed > maxShipsDestroyed) {
+            maxShipsDestroyed = players[id].shipsDestroyed
+            leader = id
         }
+    })
 
-        //check for player collisions
-        if (playerMe.name !== player.name){
-            let w = Math.abs(player.x - playerMe.x)
-            let h = Math.abs(player.y - playerMe.y)
-            let d = Math.ceil(Math.sqrt(Math.pow(w,2)) + Math.pow(h,2))
-            if (d <= SHIP_SIZE + 20) {
-                playerMe.hit = true
-                player.hit = true
-                sock.emit('playerHit', player.name)
-                sock.emit('playerHit', playerMe.name)
-            }
-        }
-        
-        let rad = 15
-        if (player.name === playerMe.name && !player.hit) {
-
-            //write leader
-            if (leader)
-            {
-                ctx.fillText(`Leader is ${leader.name} with ${leader.shipsDestroyed}`, player.x - LEADER_OFF_X, player.y - LEADER_OFF_Y)
-            }
+    //draw other players dots on minimap
+    Object.keys(players).forEach(id => {
+        let miniMapOffX = playerMe.x + MINI_MAP_X_OFF
+        let miniMapOffY = playerMe.y + MINI_MAP_Y_OFF
+        let miniMapScale = MINI_MAP_SIZE / MAP_WIDTH
 
 
-            //write current score
-            {
-                ctx.fillText(`Your current score: ${player.shipsDestroyed}`, player.x + SCORE_OFF_X, player.y - SCORE_OFF_Y)
-            }
-
-            ctx.fillStyle = "white"
+        if (id === playerMe.id) {
             ctx.beginPath()
-            ctx.arc(
-                player.x,
-                player.y,
-                5, 0, Math.PI * 2, false
-            )
-            ctx.fill()
-        }
-
-        //draw mini map dot
-        if (playerMe.name === player.name) {
-
-            ctx.strokeStyle = "white"
+            ctx.strokeStyle = 'white'
             ctx.strokeRect(
-                playerMe.x + MINI_MAP_X_OFF +( player.x * MINI_MAP_SIZE /  MAP_WIDTH) - 10,
-                playerMe.y + MINI_MAP_Y_OFF + ( player.y * MINI_MAP_SIZE /  MAP_WIDTH) - 6,
+
+                miniMapOffX + (playerMe.x * miniMapScale) - 10,
+                miniMapOffY + (playerMe.y * miniMapScale) - 6,
                 20, 12
             )
-        } else if (leader && leader.name === player.name) {
-
-            var crownStartX = playerMe.x + MINI_MAP_X_OFF + (player.x * MINI_MAP_SIZE / MAP_WIDTH) - 5
-            var crownStartY = playerMe.y + MINI_MAP_Y_OFF + (player.y * MINI_MAP_SIZE / MAP_WIDTH)
+        } else if (leader && leader === id) {
+            
+            var crownStartX = miniMapOffX + (players[id].x * miniMapScale) - 5
+            var crownStartY = miniMapOffY + (players[id].y * miniMapScale)
             ctx.strokeStyle = 'gold'
+            ctx.beginPath()
             ctx.moveTo(crownStartX, crownStartY)
             ctx.lineTo(crownStartX,crownStartY - 8)
             ctx.lineTo(crownStartX + 2,crownStartY - 5)
@@ -135,56 +104,81 @@ function drawScene(players, lasers, leader) {
             ctx.lineTo(crownStartX + 9,crownStartY)
             ctx.closePath()
             ctx.stroke()
-            ctx.strokeStyle = 'white'
+
         } else {
             ctx.fillStyle = "white"
             ctx.beginPath()
             ctx.arc(
-                playerMe.x + MINI_MAP_X_OFF +( player.x * MINI_MAP_SIZE /  MAP_WIDTH),
-                playerMe.y + MINI_MAP_Y_OFF + ( player.y * MINI_MAP_SIZE /  MAP_WIDTH),
+                miniMapOffX + (players[id].x * miniMapScale),
+                miniMapOffY + (players[id].y * miniMapScale),
                 3, 0, Math.PI * 2, false
             )
             ctx.fill()
         }
-        ctx.strokeStyle = 'white'
-        //draw ship
-        if (!player.hit){
-            ctx.fillText(player.name, player.x + 20, player.y + 20)
+    })
+   
+    //write current player's score
+    ctx.fillText(`Your current score: ${players[playerMe.id].shipsDestroyed}`, playerMe.x + SCORE_OFF_X, playerMe.y - SCORE_OFF_Y)
+    
+    //write current leader's score
+    if (leader) {
+        ctx.fillText(`Leader is ${players[leader].name} with ${players[leader].shipsDestroyed}`, playerMe.x - LEADER_OFF_X, playerMe.y - LEADER_OFF_Y)
+    }
+
+    
+    for (var i = 0; i < NUM_STARS; i++) {
+        ctx.beginPath();
+        ctx.arc(starX[i], starY[i], starRad[i], 0, 360);
+        ctx.fillStyle = "hsla(200,100%,50%,0.8)";
+        ctx.fill();
+    }
+
+    //draw ships and lasers
+    Object.keys(players).forEach(id => {
+        if (!players[id].hit) {
+            //draw lasers
+            ctx.fillStyle = 'salmon'
+            ctx.beginPath()
+            ctx.arc(players[id].laserX, players[id].laserY, 5, 0, Math.PI * 2, false)
+            ctx.fill()
+
+            //draw ships
+            let rad = 15
+            let cosAngle = Math.cos(players[id].a)
+            let sinAngle = Math.sin(players[id].a)
+            let cosAngleAmplitude = rad * Math.cos(players[id].a)
+            let sinAngleAmplitude = rad * Math.sin(players[id].a)
+            ctx.fillText(players[id].name, players[id].x + 20, players[id].y + 20)
             ctx.beginPath()
             ctx.strokeStyle = "white"
             ctx.fillStyle = "white" 
             ctx.lineWidth = 2
             ctx.moveTo( //nose of the ship
-                player.x + rad * Math.cos(player.a),
-                player.y - rad * Math.sin(player.a)
+                players[id].x + cosAngleAmplitude,
+                players[id].y - sinAngleAmplitude
             )
             ctx.lineTo( //rear left
-                player.x - rad * (Math.cos(player.a) + Math.sin(player.a)),
-                player.y + rad * (Math.sin(player.a) - Math.cos(player.a))
+                players[id].x - rad * (cosAngle + sinAngle),
+                players[id].y + rad * (sinAngle - cosAngle)
             )
             ctx.moveTo( //nose of the ship
-                player.x + rad * Math.cos(player.a),
-                player.y - rad * Math.sin(player.a)
+                players[id].x + cosAngleAmplitude,
+                players[id].y - sinAngleAmplitude
             )
             ctx.lineTo( //rear right
-                player.x - rad * (Math.cos(player.a) - Math.sin(player.a)),
-                player.y + rad * (Math.sin(player.a) + Math.cos(player.a))
+                players[id].x - rad * (cosAngle - sinAngle),
+                players[id].y + rad * (sinAngle + cosAngle)
             )
-            ctx.strokeStyle = 'white'
-            ctx.stroke()   
-        }
-    })
-
+            ctx.stroke()
+        }   
+    }) 
 }
 
 
-function animate(playerName) {
-    
-    
+function animate(playerId) {
     
     var shootTimer = 0;
     var spaceship = newSpaceship()
-
 
 
     //set up event handlers
@@ -199,7 +193,6 @@ function animate(playerName) {
 
     //game loop
     setInterval(update, 1000 / FPS)
-
     function keyDown(event) {
         switch(event.code) {
             case 'KeyA':    //rotate left
@@ -256,12 +249,9 @@ function animate(playerName) {
                 
                 x: spaceship.x + (spaceship.r + 1) * Math.cos(spaceship.a),
                 y: spaceship.y - (spaceship.r + 1) * Math.sin(spaceship.a),
-                // dx: ((spaceship.dx + LASER_SPD) * Math.cos(spaceship.a)) / FPS,
-                // dy: (-(spaceship.dy + LASER_SPD) * Math.sin(spaceship.a)) / FPS,
                 dx: (LASER_SPD + Math.abs(spaceship.thrust.x))  * Math.cos(spaceship.a),
                 dy: -1 * (LASER_SPD + Math.abs(spaceship.thrust.y)) * Math.sin(spaceship.a)
             }
-            console.log(`laser thrust x is ${spaceship.laser.dx} y is ${spaceship.laser.dy}`)
             spaceship.shoot = true;
         }
     }
@@ -273,7 +263,6 @@ function animate(playerName) {
             spaceship.thrust.x += SHIP_THRUST * Math.cos(spaceship.a) / FPS
             spaceship.thrust.y += SHIP_THRUST * Math.sin(spaceship.a) / FPS
         } else {
-
             spaceship.thrust.x -= FRICTION * spaceship.thrust.x / FPS
             spaceship.thrust.y -= FRICTION * spaceship.thrust.y / FPS
         }
@@ -287,27 +276,24 @@ function animate(playerName) {
 
         //rotate ship
         spaceship.a += spaceship.rot
-        
+
         //move ship
         spaceship.x += spaceship.thrust.x
+        spaceship.x = Math.floor(spaceship.x)
         if (spaceship.x < SHIP_SIZE) {
             spaceship.x = SHIP_SIZE
             spaceship.thrust.x = 0;
-        }
-        else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) {
+        } else if (spaceship.x > MAP_WIDTH-(CANVAS_WIDHT/2)) {
             spaceship.x = MAP_WIDTH - (CANVAS_WIDHT/2)
             spaceship.thrust.x = 0;
         }
-       
-        
 
         spaceship.y -= spaceship.thrust.y
+        spaceship.y = Math.floor(spaceship.y)
         if (spaceship.y < 0 + SHIP_SIZE) {
             spaceship.y = SHIP_SIZE
             spaceship.thrust.y = 0;
-        }
-
-        else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)){
+        } else if (spaceship.y > MAP_HEIGHT - (CANVAS_HEIGHT/2)){
             spaceship.y = MAP_HEIGHT - (CANVAS_HEIGHT/2) - 1
             spaceship.thrust.y = 0;
         } 
@@ -321,21 +307,22 @@ function animate(playerName) {
                 delete spaceship.laser
             } else {
                 spaceship.laser.x += spaceship.laser.dx
+                spaceship.laser.x = Math.floor(spaceship.laser.x)
                 spaceship.laser.y += spaceship.laser.dy
+                spaceship.laser.y = Math.floor(spaceship.laser.y)
             }
         }
        
         playerMe.x = spaceship.x
         playerMe.y = spaceship.y
-
+        
         //emit data
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {
-            sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x,spaceship.y,
+            sock.emit('submitPlayerDataAndLaser', playerId, spaceship.x,spaceship.y,
                 spaceship.a, spaceship.laser.x, spaceship.laser.y)
         } else {
-            sock.emit('submitPlayerDataAndLaser', playerName, spaceship.x, spaceship.y, spaceship.a, -5, -5)
+            sock.emit('submitPlayerDataAndLaser', playerId, spaceship.x, spaceship.y, spaceship.a, -5, -5)
         }
-        
     }
 }
 
