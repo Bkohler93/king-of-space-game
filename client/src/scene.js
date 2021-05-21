@@ -117,13 +117,7 @@ function drawScene(players) {
         }
     })
    
-    //write current player's score
-    ctx.fillText(`Your current score: ${players[playerMe.id].shipsDestroyed}`, players[playerMe.id].x + SCORE_OFF_X, players[playerMe.id].y - SCORE_OFF_Y)
-    
-    //write current leader's score
-    if (leader) {
-        ctx.fillText(`Leader is ${players[leader].name} with ${players[leader].shipsDestroyed}`, players[playerMe.id].x - LEADER_OFF_X, players[playerMe.id].y - LEADER_OFF_Y)
-    }
+  
 
     
     for (var i = 0; i < NUM_STARS; i++) {
@@ -141,10 +135,11 @@ function drawScene(players) {
         ctx.beginPath()
         ctx.arc(players[id].laserX, players[id].laserY, 5, 0, Math.PI * 2, false)
         ctx.fill()
-
+        
+        
+        //draw ships
         if (!players[id].hit) {
 
-            //draw ships
             let rad = 15
             let cosAngle = Math.cos(players[id].a)
             let sinAngle = Math.sin(players[id].a)
@@ -174,6 +169,14 @@ function drawScene(players) {
             ctx.stroke()
         }   
     }) 
+
+    //write current player's score
+    ctx.fillText(`Your current score: ${players[playerMe.id].shipsDestroyed}`, players[playerMe.id].x + SCORE_OFF_X, players[playerMe.id].y - SCORE_OFF_Y)
+    
+    //write current leader's score
+    if (leader) {
+        ctx.fillText(`Leader is ${players[leader].name} with ${players[leader].shipsDestroyed}`, players[playerMe.id].x - LEADER_OFF_X, players[playerMe.id].y - LEADER_OFF_Y)
+    }
 }
 
 
@@ -317,6 +320,7 @@ function animate(playerId) {
        
         playerMe.x = spaceship.x
         playerMe.y = spaceship.y
+        playerMe.a = spaceship.a
         
         //emit data
         if (shootTimer <= (FPS * 2) && spaceship.shoot) {
