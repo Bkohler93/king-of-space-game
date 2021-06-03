@@ -13,6 +13,13 @@ body {
     font-family: "Helvetica Neue", sans-serif;
 }
 
+#game-name {
+    font-family: "Monaco", monospace;
+}
+
+#description {
+    font-family: "Monaco", monospace;
+}
 
 .screen-wrapper {
     display: flex;
@@ -36,13 +43,9 @@ ul {
   overflow-y: scroll;
 }
 
-
-
-
 li {
   padding: 10px 10px 10px 10px;
 }
-
 
 canvas {
   display: block;
