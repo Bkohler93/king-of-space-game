@@ -15,7 +15,11 @@ sock.on('info', registerId)
 //DOM elements
 const submitNameButton = document.getElementById('submit-name')
 const submitChatButton = document.getElementById('send-chat')
+const redButton = document.getElementById('submit-red')
+const greenButton = document.getElementById('submit-green')
+const blueButton = document.getElementById('submit-blue')
 var canvas = document.getElementById('game-canvas')
+var color = 0
 
 //listeners
 window.addEventListener('keydown', event => {
@@ -25,7 +29,24 @@ window.addEventListener('keydown', event => {
 
 submitChatButton.addEventListener('click', submitChat)
 submitNameButton.addEventListener('click', sendPlayerDetails)
+redButton.addEventListener('click', setRed)
+greenButton.addEventListener('click', setGreen)
+blueButton.addEventListener('click', setBlue)
 
+function setRed() {
+   playerMe.color = "red"
+   console.log("== playerMe.color:", playerMe.color)
+}
+
+function setGreen() {
+   playerMe.color = "green"
+   console.log("== playerMe.color:", playerMe.color)
+}
+
+function setBlue() {
+   playerMe.color = "blue"
+   console.log("== playerMe.color:", playerMe.color)
+}
 
 function sendPlayerDetails() {
 
@@ -51,6 +72,11 @@ function sendPlayerDetails() {
 
 function getSubmitNameText() {
     return document.getElementById('name').value;
+}
+
+function getColor() { 
+   console.log("document.getElementbyId('color-name'):", document.getElementById('color-name').textContent)
+  //return document.getElementById('color').value
 }
 
 function submitChat() {
