@@ -66,7 +66,7 @@ function sendPlayerDetails() {
         alert('Please enter your name and color')
         return
     }
-    else if(playerMe.color != "orange" && playerMe.color != "green" && playerMe.color != "3486eb") {
+    else if(playerMe.color != "orange" && playerMe.color != "green" && playerMe.color != "#3486eb") {
        alert('Please enter your name and color')
        return
     }
