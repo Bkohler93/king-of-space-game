@@ -15,7 +15,11 @@ sock.on('info', registerId)
 //DOM elements
 const submitNameButton = document.getElementById('submit-name')
 const submitChatButton = document.getElementById('send-chat')
+const orangeButton = document.getElementById('submit-orange')
+const greenButton = document.getElementById('submit-green')
+const blueButton = document.getElementById('submit-blue')
 var canvas = document.getElementById('game-canvas')
+var color = 0
 
 //listeners
 window.addEventListener('keydown', event => {
@@ -25,15 +29,46 @@ window.addEventListener('keydown', event => {
 
 submitChatButton.addEventListener('click', submitChat)
 submitNameButton.addEventListener('click', sendPlayerDetails)
+orangeButton.addEventListener('click', setOrange)
+greenButton.addEventListener('click', setGreen)
+blueButton.addEventListener('click', setBlue)
 
+function setOrange() {
+   playerMe.color = "orange"
+   console.log("== playerMe.color:", playerMe.color)
+   orangeButton.style.backgroundColor = "orange"
+   greenButton.style.backgroundColor = "#efefef"
+   blueButton.style.backgroundColor = "#efefef"
+}
+
+function setGreen() {
+   playerMe.color = "green"
+   console.log("== playerMe.color:", playerMe.color)
+   orangeButton.style.backgroundColor = "#efefef"
+   greenButton.style.backgroundColor = "green"
+   blueButton.style.backgroundColor = "#efefef"
+}
+
+function setBlue() {
+   playerMe.color = "#3486eb"
+   console.log("== playerMe.color:", playerMe.color)
+   orangeButton.style.backgroundColor = "#efefef"
+   greenButton.style.backgroundColor = "#efefef"
+   blueButton.style.backgroundColor = "#3486eb"
+}
 
 function sendPlayerDetails() {
 
     var name = getSubmitNameText();
+    console.log("playerMe.color:", playerMe.color)
     
     if (!name) {
-        alert('Please enter your name')
+        alert('Please enter your name and color')
         return
+    }
+    else if(playerMe.color != "orange" && playerMe.color != "green" && playerMe.color != "#3486eb") {
+       alert('Please enter your name and color')
+       return
     }
     playerMe.name = name;
     playerMe.hit = false;

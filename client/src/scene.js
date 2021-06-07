@@ -131,7 +131,12 @@ function drawScene(players) {
     Object.keys(players).forEach(id => {
 
         //draw lasers
-        ctx.fillStyle = 'salmon'
+	if(id === playerMe.id) {
+           ctx.fillStyle = playerMe.color
+	}
+	else {
+	   ctx.fillStyle = "red"
+	}
         ctx.beginPath()
         ctx.arc(players[id].laserX, players[id].laserY, 5, 0, Math.PI * 2, false)
         ctx.fill()
@@ -147,8 +152,13 @@ function drawScene(players) {
             let sinAngleAmplitude = rad * Math.sin(players[id].a)
             ctx.fillText(players[id].name, players[id].x + 20, players[id].y + 20)
             ctx.beginPath()
-            ctx.strokeStyle = "white"
-            ctx.fillStyle = "white" 
+	    if(id === playerMe.id) {
+               ctx.strokeStyle = playerMe.color
+	    }
+	    else {
+	       ctx.strokeStyle = "red"
+	    }
+            ctx.fillStyle = "white"
             ctx.lineWidth = 2
             ctx.moveTo( //nose of the ship
                 players[id].x + cosAngleAmplitude,
