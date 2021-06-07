@@ -20,19 +20,23 @@ const orangeButton = document.getElementById("submit-orange");
 const greenButton = document.getElementById("submit-green");
 const blueButton = document.getElementById("submit-blue");
 const scoreboard = document.getElementById("score-list");
+const chatField = document.getElementById("chat");
 var canvas = document.getElementById("game-canvas");
 var color = 0;
+var chatFocused = false;
 
 //listeners
-window.addEventListener("keydown", (event) => {
-  if (event.code === "Space") event.preventDefault();
-});
+// window.addEventListener("keydown", (event) => {
+//   if (event.code === "Space") event.preventDefault();
+// });
 
 submitChatButton.addEventListener("click", submitChat);
 submitNameButton.addEventListener("click", sendPlayerDetails);
 orangeButton.addEventListener("click", setOrange);
 greenButton.addEventListener("click", setGreen);
 blueButton.addEventListener("click", setBlue);
+chatField.addEventListener("focus", enterToSubmitChat);
+chatField.addEventListener("blur", unfocusedChatField);
 
 function setOrange() {
   playerMe.color = "orange";
@@ -112,6 +116,18 @@ function logChat(text) {
   chatList.scrollTo(0, chatHeight);
 }
 
+function enterToSubmitChat() {
+  chatFocused = true;
+  document.addEventListener("keydown", (event) => {
+    if (event.code === "Enter") submitChat();
+  });
+}
+
+function unfocusedChatField() {
+  chatFocused = false;
+  console.log("chat field unfocused");
+}
+
 function logNewPlayer(player) {
   const newPlayerMessage = document.createElement("li");
   const chatList = document.getElementById("chats");
@@ -142,4 +158,4 @@ function updateScoreboard(players) {
   }
 }
 
-export { sock, playerMe };
+export { sock, playerMe, chatFocused };
