@@ -131,10 +131,14 @@ function updateScoreboard(players) {
     scoreboard.removeChild(scoreboard.lastChild);
   }
 
+  var leaderCount = 0;
   for (let player of players) {
+    if (leaderCount === 3) break;
+
     var playerScore = document.createElement("li");
     playerScore.textContent = player[0] + "     " + player[1];
     scoreboard.appendChild(playerScore);
+    leaderCount++;
   }
 }
 
