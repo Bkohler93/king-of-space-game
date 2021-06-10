@@ -107,14 +107,21 @@ function resetPlayerShip(playerId) {
 function addDestroyCount(playerId) {
   players[playerId].shipsDestroyed++;
 
-  //update leaderboardc
-  const leader = new Leader({
-    name: players[playerId].name,
-    score: players[playerId].shipsDestroyed,
+  Leader.find({ name: players[playerId].name }).then((leader) => {
+    if (!leader[0]) {
+      const leader = new Leader({
+        name: players[playerId].name,
+        score: players[playerId].shipsDestroyed,
+      });
+
+      leader.save();
+    } else if (players[playerId].shipsDestroyed > leader[0].score) {
+      leader[0].score = players[playerId].shipsDestroyed;
+      leader[0].save();
+    }
   });
-  console.log("added to leaderboard");
-  leader.save();
 }
+
 //populate each player object with lasers and new positions
 function addPlayerSceneWithLaser(playerId, x, y, a, laserX, laserY) {
   players[playerId].x = x;
