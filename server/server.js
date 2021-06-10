@@ -34,15 +34,22 @@ router.get("/", function (req, res) {
 
 router.get("/leaderboard", async function (req, res) {
   try {
-    Leader.find({})
-      .lean()
-      .then((result) => {
-        result.sort((a, b) => b.score - a.score);
-        res.status(200).render("leaderPage", {
-          layout: "leaderBoard",
-          leaders: result,
-        });
-      });
+    const leaders = await Leader.find({}).lean();
+    leaders.sort((a, b) => b.score - a.score);
+    res.status(200).render("leaderPage", {
+      layout: "leaderBoard",
+      leaders: leaders,
+    });
+
+    // Leader.find({})
+    //   .lean()
+    //   .then((result) => {
+    //     result.sort((a, b) => b.score - a.score);
+    //     res.status(200).render("leaderPage", {
+    //       layout: "leaderBoard",
+    //       leaders: result,
+    //     });
+    //   });
   } catch (err) {
     console.log("Catch an error: ", err);
   }
