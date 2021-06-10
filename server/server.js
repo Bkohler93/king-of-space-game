@@ -4,8 +4,9 @@ const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const Leader = require("../models/leader");
 
+const router = express.Router();
 const app = express();
-app.use(express.static(`${__dirname}/../client`));
+//app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server); // socket.io wraps around server. filters out requests related
 //                            to socket.io, other request pass to express
@@ -32,6 +33,15 @@ app.get("/leaderboard", (req, res) => {
       res.send(result);
     })
     .catch((err) => console.log(err));
+});
+
+router.get('/',function(req,res){
+  res.sendFile(path.join(dirname+'../src/index.html'));
+  //dirname : It will resolve to your project folder.
+});
+
+router.get('/leaderboard',function(req,res){
+  res.sendFile(path.join(__dirname+'../src/leaderboardpage.html'));
 });
 
 const FPS = 30;
@@ -147,6 +157,8 @@ function processNewPlayer(player) {
 server.on("error", (err) => {
   console.error(err);
 });
+
+app.use("/",router);
 
 //server needs to listen on port
 port = process.env.PORT || 8022;
