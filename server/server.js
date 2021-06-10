@@ -1,9 +1,10 @@
+require("dotenv").config();
 const http = require("http");
+const exphbs = require("express-handlebars");
 const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const path = require("path");
-const exphbs = require("express-handlebars");
 const Leader = require("../models/leader");
 
 const router = express.Router();
@@ -14,25 +15,21 @@ app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server); // socket.io wraps around server. filters out requests related
 //                            to socket.io, other request pass to express
-
+// mongodb+srv://cs290kingofspace:kingofspace1234@kingofspace.o5a9z.mongodb.net/leaderboard?retryWrites=true&w=majority
 //connect to mongoDB
-mongoose.connect(
-  "mongodb+srv://cs290kingofspace:kingofspace1234@kingofspace.o5a9z.mongodb.net/leaderboard?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
-  }
-);
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+});
 
 //test connection
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDb connection error:"));
 
-
 router.get("/", function (req, res) {
-  res.status(200).render("mainPage", { layout: "main"});
+  res.status(200).render("mainPage", { layout: "main" });
 });
 
 router.get("/leaderboard", function (req, res) {
