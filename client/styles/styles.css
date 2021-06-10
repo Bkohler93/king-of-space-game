@@ -27,7 +27,6 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: grey;
 }
 
 input {
@@ -54,7 +53,6 @@ canvas {
 }
 
 .content-wrapper {
-    border: 5px solid black;
     display: flex;
     flex-direction: row-reverse;
     width: 80%;
@@ -171,16 +169,4 @@ canvas {
 #controls {
     position: absolute;
     bottom: 20px;
-}
-
-#submit-orange {
-   background-color: #efefef;
-}
-
-#submit-green {
-   background-color: #efefef;
-}
-
-#submit-blue {
-   background-color: #efefef;
 }
