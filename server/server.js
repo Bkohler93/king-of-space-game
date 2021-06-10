@@ -2,11 +2,12 @@ const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
+const path = require("path");
 const Leader = require("../models/leader");
 
 const router = express.Router();
 const app = express();
-//app.use(express.static(`${__dirname}/../client`));
+app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server); // socket.io wraps around server. filters out requests related
 //                            to socket.io, other request pass to express
@@ -35,16 +36,19 @@ app.get("/leaderboard", (req, res) => {
     .catch((err) => console.log(err));
 });
 
-router.get('/',function(req,res){
-  res.sendFile(path.join(dirname+'../src/index.html'));
+router.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname + "/../client/index.html"));
   //dirname : It will resolve to your project folder.
 });
 
-router.get('/leaderboard',function(req,res){
-  res.sendFile(path.join(__dirname+'../src/leaderboardpage.html'));
+router.get("/leaderboard", function (req, res) {
+  res.sendFile(path.join(__dirname + "../src/leaderboardpage.html"));
 });
 
 const FPS = 30;
+const MAP_WIDTH = 3000;
+const MAP_HEIGHT = 3000;
+const SHIP_SIZE = 30;
 
 //players object
 var players = {};
@@ -110,7 +114,9 @@ function resetPlayerShip(playerId) {
   deadPlayers[playerId] = 100;
   players[playerId].hit = true;
   players[playerId].shipsDestroyed = 0;
-  io.to(playerId).emit("spaceshipHit");
+  players[playerId].x = Math.floor(Math.random() * (MAP_WIDTH - SHIP_SIZE));
+  players[playerId].y = Math.floor(Math.random() * (MAP_HEIGHT - SHIP_SIZE));
+  io.to(playerId).emit("spaceshipHit", [players[playerId].x, players[playerId].y]);
 }
 
 //executes when player lands a shot on another player
@@ -158,7 +164,7 @@ server.on("error", (err) => {
   console.error(err);
 });
 
-app.use("/",router);
+app.use("/", router);
 
 //server needs to listen on port
 port = process.env.PORT || 8022;

@@ -57,7 +57,7 @@ function drawScene(players) {
 
   //check for collisions
   Object.keys(players).forEach((id) => {
-    if (id !== playerMe.id) {
+    if (id !== playerMe.id && !players[id].hit) {
       let w = Math.abs(players[id].x - playerMe.x);
       let h = Math.abs(players[id].y - playerMe.y);
       let d = Math.ceil(Math.sqrt(Math.pow(w, 2)) + Math.pow(h, 2));
@@ -107,7 +107,7 @@ function drawScene(players) {
     let miniMapOffY = players[playerMe.id].y + MINI_MAP_Y_OFF;
     let miniMapScale = MINI_MAP_SIZE / MAP_WIDTH;
 
-    if (id === playerMe.id) {
+    if (id === playerMe.id && !players[id].hit) {
       ctx.beginPath();
       ctx.strokeStyle = "white";
       ctx.strokeRect(
@@ -130,7 +130,7 @@ function drawScene(players) {
       ctx.lineTo(crownStartX + 9, crownStartY);
       ctx.closePath();
       ctx.stroke();
-    } else {
+    } else if (!players[id].hit) {
       ctx.fillStyle = "white";
       ctx.beginPath();
       ctx.arc(
@@ -189,17 +189,13 @@ function drawScene(players) {
         //rear left
         players[id].x - rad * (cosAngle + sinAngle),
         players[id].y + rad * (sinAngle - cosAngle)
-      );
-      ctx.moveTo(
-        //nose of the ship
-        players[id].x + cosAngleAmplitude,
-        players[id].y - sinAngleAmplitude
-      );
+      ); 
       ctx.lineTo(
         //rear right
         players[id].x - rad * (cosAngle - sinAngle),
         players[id].y + rad * (sinAngle + cosAngle)
       );
+      ctx.closePath();
       ctx.stroke();
     }
   });
@@ -230,9 +226,9 @@ function animate(playerId) {
   document.addEventListener("keyup", (event) => keyUp(event));
 
   //listeners
-  sock.on("spaceshipHit", () => {
-    spaceship.x = Math.floor(Math.random() * (MAP_WIDTH - SHIP_SIZE));
-    spaceship.y = Math.floor(Math.random() * (MAP_HEIGHT - SHIP_SIZE));
+  sock.on("spaceshipHit", ([x, y]) => {
+    spaceship.x = x;
+    spaceship.y = y;
   });
 
   //game loop
@@ -258,19 +254,19 @@ function animate(playerId) {
 
   function keyUp(event) {
     if (!chatFocused) {
-        switch (event.code) {
+      switch (event.code) {
         case "KeyA": // stop rotating left
-            spaceship.rot = 0;
-            break;
+          spaceship.rot = 0;
+          break;
         case "KeyW": //stop thrust forward
-            spaceship.thrusting = false;
-            break;
+          spaceship.thrusting = false;
+          break;
         case "KeyD": //stop rotating right
-            spaceship.rot = 0;
-            break;
+          spaceship.rot = 0;
+          break;
         case "Space": //allow shoooting again
-            break;
-        }
+          break;
+      }
     }
   }
 
