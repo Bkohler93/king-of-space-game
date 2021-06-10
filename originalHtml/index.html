@@ -1,94 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Leader Board</title>
-    <link rel="stylesheet" href="/styles/leaderstyles.css" />
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="lboard_section">
-        <div class="lboard_tabs">
-          <div class="tabs">
-            <ul>
-              <!-- <li data-li="today">Leaderboard</li>-->
-              <li data-li="today">
-                <a href="/"> View Main Page </a>
-              </li>
-            </ul>
-          </div>
-        </div>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>King of Space Game</title>
+        <link rel="shortcut icon" type="image/x-icon" href="styles/img/kos-logo.png" />
+        <meta name="description" content="multiplayer space game">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="./styles/styles.css">
+    </head>
+    <body>
+        <div class="screen-wrapper">
+            <img id="header-img" src="styles/img/kos-header.png" alt="King of Space!">
 
-        <div class="lboard_wrap">
-          <div class="lboard_item month" style="display: block">
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>1.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 95%"></div>
+      <p id="description">Destroy all other spaceships and rule the galaxy.</p>
+
+            <div id="enter-game">
+                <div id="enter-name">
+                    <input type="text" id="name" placeholder="Enter your name">
+                    <button type="button" id="submit-name">Submit</button>
+		    <button type="button" id= "board" > <a href ="/leaderboard"> View Leaderboard </a></button>
                 </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>2.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 80%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>3.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 70%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>4.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 50%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>5.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 30%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>6.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 30%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-            <div class="lboard_mem">
-              <div class="name_bar">
-                <p><span>7.</span>name here</p>
-                <div class="bar_wrap">
-                  <div class="inner_bar" style="width: 30%"></div>
-                </div>
-              </div>
-              <div class="points">points</div>
-            </div>
-          </div>
+
+        <div id="select-color">
+          <form id="colors">
+            <button type="button" id="submit-orange">Orange</button>
+            <button type="button" id="submit-blue">Blue</button>
+            <button type="button" id="submit-green">Green</button>
+          </form>
         </div>
       </div>
+      <div class="content-wrapper">
+        <div class="chat-score-wrapper">
+          <div class="chat-box-wrapper">
+            <ul id="chats"></ul>
+            <div class="user-controls">
+              <div class="controls-wrapper">
+                <div id="send-chat-container">
+                  <div id="chat-form">
+                    <input id="chat" title="chat" />
+                    <button id="send-chat">Send</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="scores-container">
+            <h2 id="leaderboard">Leaderboard</h2>
+            <div id="high-scores">
+              <ul id="score-list"></ul>
+            </div>
+          </div>
+        </div>
+        <div class="game-wrapper">
+          <canvas
+            style="border: 1px solid black"
+            id="game-canvas"
+            width="700"
+            height="600"
+          ></canvas>
+        </div>
+      </div>
+
+      <p id="controls">Controls: WASD, Spacebar to shoot.</p>
     </div>
 
-    <script src="scripts.js"></script>
+    <!-- socketio module intercepts request for socket.io.js clientside and
+        return with clientside content of script -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="./src/client.js" async defer></script>
   </body>
 </html>
