@@ -3,10 +3,13 @@ const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const path = require("path");
+const exphbs = require("express-handlebars");
 const Leader = require("../models/leader");
 
 const router = express.Router();
 const app = express();
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
 app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server); // socket.io wraps around server. filters out requests related
@@ -27,22 +30,21 @@ mongoose.connect(
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDb connection error:"));
 
-//leaderboard page
-app.get("/leaderboard", (req, res) => {
-  Leader.find()
-    .then((result) => {
-      res.send(result);
-    })
-    .catch((err) => console.log(err));
-});
 
 router.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname + "/../client/index.html"));
-  //dirname : It will resolve to your project folder.
+  res.status(200).render("mainPage", { layout: "main"});
 });
 
 router.get("/leaderboard", function (req, res) {
-  res.sendFile(path.join(__dirname + "../src/leaderboardpage.html"));
+  Leader.find({})
+    .lean()
+    .then((result) => {
+      result.sort((a, b) => b.score - a.score);
+      res.status(200).render("leaderPage", {
+        layout: "leaderBoard",
+        leaders: result,
+      });
+    });
 });
 
 const FPS = 30;
@@ -116,7 +118,10 @@ function resetPlayerShip(playerId) {
   players[playerId].shipsDestroyed = 0;
   players[playerId].x = Math.floor(Math.random() * (MAP_WIDTH - SHIP_SIZE));
   players[playerId].y = Math.floor(Math.random() * (MAP_HEIGHT - SHIP_SIZE));
-  io.to(playerId).emit("spaceshipHit", [players[playerId].x, players[playerId].y]);
+  io.to(playerId).emit("spaceshipHit", [
+    players[playerId].x,
+    players[playerId].y,
+  ]);
 }
 
 //executes when player lands a shot on another player

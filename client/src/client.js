@@ -111,7 +111,6 @@ function logChat(text) {
 
   chatList.appendChild(newChat);
   var chatHeight = chatList.scrollHeight;
-
   //show most recent chat
   chatList.scrollTo(0, chatHeight);
 }
