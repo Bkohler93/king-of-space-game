@@ -1,0 +1,55 @@
+<div class="screen-wrapper">
+   <img id="header-img" src="styles/img/kos-header.png" alt="King of Space!">
+
+   <p id="description">Destroy all other spaceships and rule the galaxy.</p>
+
+   <div id="enter-game">
+      <div id="enter-name">
+         <input type="text" id="name" placeholder="Enter your name">
+         <button type="button" id="submit-name">Submit</button>
+ 	 <button type="button" id= "board" > <a href ="/leaderboard"> View Leaderboard </a></button>
+      </div>
+      
+      <div id="select-color">
+         <form id="colors">
+            <button type="button" id="submit-orange">Orange</button>
+            <button type="button" id="submit-blue">Blue</button>
+            <button type="button" id="submit-green">Green</button>
+         </form>
+      </div>
+   </div>
+   <div class="content-wrapper">
+      <div class="chat-score-wrapper">
+         <div class="chat-box-wrapper">
+            <ul id="chats"></ul>
+               <div class="user-controls">
+                  <div class="controls-wrapper">
+                     <div id="send-chat-container">
+                        <div id="chat-form">
+                           <input id="chat" title="chat" />
+                           <button id="send-chat">Send</button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div id="scores-container">
+               <h2 id="leaderboard">Leaderboard</h2>
+               <div id="high-scores">
+                  <ul id="score-list"></ul>
+               </div>
+            </div>
+         </div>
+         <div class="game-wrapper">
+            <canvas
+               style="border: 1px solid black"
+               id="game-canvas"
+               width="700"
+               height="600"
+            ></canvas>
+         </div>
+      </div>
+
+      <p id="controls">Controls: WASD, Spacebar to shoot.</p>
+</div>
