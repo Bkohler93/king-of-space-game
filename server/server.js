@@ -15,7 +15,7 @@ app.use(express.static(`${__dirname}/../client`));
 const server = http.createServer(app);
 const io = socketio(server); // socket.io wraps around server. filters out requests related
 //                            to socket.io, other request pass to express
-// mongodb+srv://cs290kingofspace:kingofspace1234@kingofspace.o5a9z.mongodb.net/leaderboard?retryWrites=true&w=majority
+
 //connect to mongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
@@ -40,16 +40,6 @@ router.get("/leaderboard", async function (req, res) {
       layout: "leaderBoard",
       leaders: leaders,
     });
-
-    // Leader.find({})
-    //   .lean()
-    //   .then((result) => {
-    //     result.sort((a, b) => b.score - a.score);
-    //     res.status(200).render("leaderPage", {
-    //       layout: "leaderBoard",
-    //       leaders: result,
-    //     });
-    //   });
   } catch (err) {
     console.log("Catch an error: ", err);
   }
