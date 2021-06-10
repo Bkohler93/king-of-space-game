@@ -189,13 +189,17 @@ function drawScene(players) {
         //rear left
         players[id].x - rad * (cosAngle + sinAngle),
         players[id].y + rad * (sinAngle - cosAngle)
-      ); 
+      );
+      ctx.moveTo(
+        //back to nose of ship
+        players[id].x + cosAngleAmplitude,
+        players[id].y - sinAngleAmplitude
+      );
       ctx.lineTo(
         //rear right
         players[id].x - rad * (cosAngle - sinAngle),
         players[id].y + rad * (sinAngle + cosAngle)
       );
-      ctx.closePath();
       ctx.stroke();
     }
   });
