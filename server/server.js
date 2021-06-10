@@ -32,16 +32,20 @@ router.get("/", function (req, res) {
   res.status(200).render("mainPage", { layout: "main" });
 });
 
-router.get("/leaderboard", function (req, res) {
-  Leader.find({})
-    .lean()
-    .then((result) => {
-      result.sort((a, b) => b.score - a.score);
-      res.status(200).render("leaderPage", {
-        layout: "leaderBoard",
-        leaders: result,
+router.get("/leaderboard", async function (req, res) {
+  try {
+    Leader.find({})
+      .lean()
+      .then((result) => {
+        result.sort((a, b) => b.score - a.score);
+        res.status(200).render("leaderPage", {
+          layout: "leaderBoard",
+          leaders: result,
+        });
       });
-    });
+  } catch (err) {
+    console.log("Catch an error: ", err);
+  }
 });
 
 const FPS = 30;
