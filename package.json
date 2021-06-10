@@ -17,6 +17,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "mongodb": "^3.6.9",
+    "mongoose": "^5.12.13",
     "socket.io": "^4.0.2"
   },
   "engines": {
