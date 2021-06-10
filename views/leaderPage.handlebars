@@ -1,0 +1,20 @@
+<div class="wrapper">
+   <div class="lboard_section">
+      <div class="lboard_tabs">
+         <div class="tabs">
+	    <ul>
+	       <!-- <li data-li="today">Leaderboard</li>-->
+	       <li data-li="today"><a href="/"> View Main Page </a></li>
+	    </ul>
+	 </div>
+      </div>
+
+      <div class="lboard_wrap">
+         <div class="lboard_item month" style="display: block">
+	    {{#each leaders}}
+	       {{> leader}}
+	    {{/each}}
+	 </div>
+      </div>
+   </div>
+</div>
