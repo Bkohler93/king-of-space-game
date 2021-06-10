@@ -14,8 +14,12 @@ body {
     background-color: #9ECAE0
 }
 
-#game-name {
-    font-family: "Monaco", monospace;
+#header-img {
+    display: block;
+    margin-top: 1%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 20%;
 }
 
 #description {
@@ -27,6 +31,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: #9ECAE0;
 }
 
 input {
