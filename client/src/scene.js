@@ -48,7 +48,7 @@ function drawScene(players) {
       if (d <= SHIP_SIZE - 4.5) {
         players[id].hit = true;
         playerMe.destroyedShip = true;
-        playerMe.destroyCounter = 6;
+        playerMe.destroyCounter = 15;
         sock.emit("shipDestroyed", playerMe.id);
         sock.emit("playerHit", id);
       }

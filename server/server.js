@@ -70,7 +70,7 @@ io.on("connection", (sock) => {
 function gameUpdate() {
   Object.keys(deadPlayers).forEach((id) => {
     deadPlayers[id]--;
-    if (deadPlayers[id] < 30) {
+    if (deadPlayers[id] < 0) {
       players[id].hit = false;
       delete deadPlayers[id];
     }
@@ -97,7 +97,7 @@ function scoreUpdate() {
 //executes upon receiving hit from a socket with playername that is hit.
 // send result to hit player
 function resetPlayerShip(playerId) {
-  deadPlayers[playerId] = 30;
+  deadPlayers[playerId] = 100;
   players[playerId].hit = true;
   players[playerId].shipsDestroyed = 0;
   io.to(playerId).emit("spaceshipHit");
