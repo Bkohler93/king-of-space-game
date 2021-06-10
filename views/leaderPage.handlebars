@@ -1,10 +1,11 @@
 <div class="wrapper">
+	   {{!-- <h3>Leaderboard</h3> --}}
    <div class="lboard_section">
       <div class="lboard_tabs">
          <div class="tabs">
 	    <ul>
-	       <!-- <li data-li="today">Leaderboard</li>-->
-	       <li data-li="today"><a href="/"> View Main Page </a></li>
+	        <li data-li="today">Leaderboard</li>
+	       {{!-- <li data-li="today"><a href="/"> View Main Page </a></li> --}}
 	    </ul>
 	 </div>
       </div>
@@ -16,5 +17,6 @@
 	    {{/each}}
 	 </div>
       </div>
+      {{> backButton}}
    </div>
 </div>
