@@ -17,7 +17,7 @@ const io = socketio(server); // socket.io wraps around server. filters out reque
 //                            to socket.io, other request pass to express
 // mongodb+srv://cs290kingofspace:kingofspace1234@kingofspace.o5a9z.mongodb.net/leaderboard?retryWrites=true&w=majority
 //connect to mongoDB
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect("mongodb+srv://cs290kingofspace:kingofspace1234@kingofspace.o5a9z.mongodb.net/leaderboard?retryWrites=true&w=majority", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
