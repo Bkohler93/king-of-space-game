@@ -1,0 +1,24 @@
+<html>
+   <head>
+      <meta charset="utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <title>King of Space Game</title>
+      <link
+         rel="shortcut icon"
+         type="image/x-icon"
+	 href="styles/img/kos-logo.png"	
+      />
+      <meta name="description" content="multiplayer space game" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="stylesheet" href="/styles/styles.css" />
+   </head>
+   <body>
+      {{!-- {{> header}} --}}
+      {{{body}}}
+
+      <!-- socketio module intercepts request for socket.io.js clientside and
+          return with clientside content of script -->
+      <script src="/socket.io/socket.io.js"></script>
+      <script type="module" src="./src/client.js" async defer></script>
+   </body>
+</html>
